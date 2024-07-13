@@ -1,6 +1,10 @@
 
     
-    logos <- hoopR::load_nba_player_box(2024)%<%
+# Weak Link Theory
+    
+    
+    
+    logos <- hoopR::load_nba_player_box(2024)%>%
       reframe(athlete_id, athlete_display_name, athlete_position_abbreviation)
     
     
@@ -21,22 +25,22 @@
     
     
     
-    lineups23 <- lineups%<%
+    lineups23 <- lineups%>%
       mutate(year = "2023-24")
     
     
     
-# Player 1   
+    # Player 1   
     
     
     
     
     
-    lebron23 <- lebron%<%
-      filter(Season == "2023-24")%<%
-      #mutate_at("PLAYER_ID", as.character)%<%
+    lebron23 <- lebron%>%
+      filter(Season == "2023-24")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
       mutate(DLEBRON1_Percentile = rank(DLEBRON)/length(DLEBRON),
-             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%<%
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
       reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON1_Percentile)
     
     names(lebron23)[names(lebron23) == "PLAYER_NAME"] <- "PLAYER_1_NAME"
@@ -56,18 +60,18 @@
     
     
     lineups23full <- left_join(lineups23,lebron23, by = c("player_id_1"="PLAYER_ID"))
-      
-    
-# Player 2
     
     
+    # Player 2
     
     
-    lebron23 <- lebron%<%
-      filter(Season == "2023-24")%<%
-      #mutate_at("PLAYER_ID", as.character)%<%
+    
+    
+    lebron23 <- lebron%>%
+      filter(Season == "2023-24")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
       mutate(DLEBRON2_Percentile = rank(DLEBRON)/length(DLEBRON),
-             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%<%
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
       reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON2_Percentile)
     
     names(lebron23)[names(lebron23) == "PLAYER_NAME"] <- "PLAYER_2_NAME"
@@ -96,11 +100,11 @@
     
     
     
-    lebron23 <- lebron%<%
-      filter(Season == "2023-24")%<%
-      #mutate_at("PLAYER_ID", as.character)%<%
+    lebron23 <- lebron%>%
+      filter(Season == "2023-24")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
       mutate(DLEBRON3_Percentile = rank(DLEBRON)/length(DLEBRON),
-             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%<%
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
       reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON3_Percentile)
     
     names(lebron23)[names(lebron23) == "PLAYER_NAME"] <- "PLAYER_3_NAME"
@@ -128,11 +132,11 @@
     
     
     
-    lebron23 <- lebron%<%
-      filter(Season == "2023-24")%<%
-      #mutate_at("PLAYER_ID", as.character)%<%
+    lebron23 <- lebron%>%
+      filter(Season == "2023-24")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
       mutate(DLEBRON4_Percentile = rank(DLEBRON)/length(DLEBRON),
-             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%<%
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
       reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON4_Percentile)
     
     names(lebron23)[names(lebron23) == "PLAYER_NAME"] <- "PLAYER_4_NAME"
@@ -160,11 +164,11 @@
     
     
     
-    lebron23 <- lebron%<%
-      filter(Season == "2023-24")%<%
-      #mutate_at("PLAYER_ID", as.character)%<%
+    lebron23 <- lebron%>%
+      filter(Season == "2023-24")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
       mutate(DLEBRON5_Percentile = rank(DLEBRON)/length(DLEBRON),
-             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%<%
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
       reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON5_Percentile)
     
     names(lebron23)[names(lebron23) == "PLAYER_NAME"] <- "PLAYER_5_NAME"
@@ -185,19 +189,19 @@
     
     lineups23full <- left_join(lineups23full,lebron23, by = c("player_id_5"="PLAYER_ID"))
     
-    lineup_calc <- lineups23full%<%
+    lineup_calc <- lineups23full%>%
       mutate(best_DLEBRON = case_when(
-                       DLEBRON1 < DLEBRON2 & DLEBRON1 < DLEBRON3 & DLEBRON1 < DLEBRON4 & DLEBRON1< DLEBRON5 ~ DLEBRON1,
-                       DLEBRON2 < DLEBRON1 & DLEBRON2 < DLEBRON3 & DLEBRON2 < DLEBRON4 & DLEBRON2< DLEBRON5 ~ DLEBRON2,
-                       DLEBRON3 < DLEBRON1 & DLEBRON3 < DLEBRON2 & DLEBRON3 < DLEBRON4 & DLEBRON3< DLEBRON5 ~ DLEBRON3,
-                       DLEBRON4 < DLEBRON1 & DLEBRON4 < DLEBRON2 & DLEBRON4 < DLEBRON3 & DLEBRON4< DLEBRON5 ~ DLEBRON4,
-                       DLEBRON5 < DLEBRON1 & DLEBRON5 < DLEBRON2 & DLEBRON5 < DLEBRON3 & DLEBRON5< DLEBRON4 ~ DLEBRON5),
-             worst_DLEBRON = case_when(
-               DLEBRON1 < DLEBRON2 & DLEBRON1 < DLEBRON3 & DLEBRON1 < DLEBRON4 & DLEBRON1< DLEBRON5 ~ DLEBRON1,
-               DLEBRON2 < DLEBRON1 & DLEBRON2 < DLEBRON3 & DLEBRON2 < DLEBRON4 & DLEBRON2< DLEBRON5 ~ DLEBRON2,
-               DLEBRON3 < DLEBRON1 & DLEBRON3 < DLEBRON2 & DLEBRON3 < DLEBRON4 & DLEBRON3< DLEBRON5 ~ DLEBRON3,
-               DLEBRON4 < DLEBRON1 & DLEBRON4 < DLEBRON2 & DLEBRON4 < DLEBRON3 & DLEBRON4< DLEBRON5 ~ DLEBRON4,
-               DLEBRON5 < DLEBRON1 & DLEBRON5 < DLEBRON2 & DLEBRON5 < DLEBRON3 & DLEBRON5< DLEBRON4 ~ DLEBRON5))
+        DLEBRON1 > DLEBRON2 & DLEBRON1 > DLEBRON3 & DLEBRON1 > DLEBRON4 & DLEBRON1> DLEBRON5 ~ DLEBRON1,
+        DLEBRON2 > DLEBRON1 & DLEBRON2 > DLEBRON3 & DLEBRON2 > DLEBRON4 & DLEBRON2> DLEBRON5 ~ DLEBRON2,
+        DLEBRON3 > DLEBRON1 & DLEBRON3 > DLEBRON2 & DLEBRON3 > DLEBRON4 & DLEBRON3> DLEBRON5 ~ DLEBRON3,
+        DLEBRON4 > DLEBRON1 & DLEBRON4 > DLEBRON2 & DLEBRON4 > DLEBRON3 & DLEBRON4> DLEBRON5 ~ DLEBRON4,
+        DLEBRON5 > DLEBRON1 & DLEBRON5 > DLEBRON2 & DLEBRON5 > DLEBRON3 & DLEBRON5> DLEBRON4 ~ DLEBRON5),
+        worst_DLEBRON = case_when(
+          DLEBRON1 < DLEBRON2 & DLEBRON1 < DLEBRON3 & DLEBRON1 < DLEBRON4 & DLEBRON1< DLEBRON5 ~ DLEBRON1,
+          DLEBRON2 < DLEBRON1 & DLEBRON2 < DLEBRON3 & DLEBRON2 < DLEBRON4 & DLEBRON2< DLEBRON5 ~ DLEBRON2,
+          DLEBRON3 < DLEBRON1 & DLEBRON3 < DLEBRON2 & DLEBRON3 < DLEBRON4 & DLEBRON3< DLEBRON5 ~ DLEBRON3,
+          DLEBRON4 < DLEBRON1 & DLEBRON4 < DLEBRON2 & DLEBRON4 < DLEBRON3 & DLEBRON4< DLEBRON5 ~ DLEBRON4,
+          DLEBRON5 < DLEBRON1 & DLEBRON5 < DLEBRON2 & DLEBRON5 < DLEBRON3 & DLEBRON5< DLEBRON4 ~ DLEBRON5))
     
     
     
@@ -214,3 +218,16 @@
            subtitle = "Bars Represent Individual Game Score | Stars Represent Season Average Game Score")+
       theme(plot.title = element_text(size = 30, face = "bold", hjust = 0.5))+
       theme(plot.subtitle = element_text(size = 20, hjust = 0.5))
+
+
+
+
+
+
+
+
+
+
+
+
+
