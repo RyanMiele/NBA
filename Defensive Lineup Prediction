@@ -1172,7 +1172,103 @@
       select(-Def_Rating)
     
     
+
+
     
+    df_new <- df_new%>%
+      mutate(Def_Rating_Percentile = rank(-Def_Rating)/length(Def_Rating))%>%
+      select(-Def_Rating)
+    
+    
+    
+    
+    lm <- lm(Def_Rating_Percentile ~ .,data = df_new)
+    
+
+
+
+# User Input
+
+    
+    
+    Guard1 <- lebron23%>%
+      filter(PLAYER_5_NAME == "Cam Thomas")%>%
+      reframe(DLEBRON5_Percentile,AGE5,PLAYER_HEIGHT_INCHES5,PLAYER_WEIGHT5)
+    
+    names(Guard1)[names(Guard1) == "DLEBRON5_Percentile"] <- "Guard1_DLEBRON"
+    names(Guard1)[names(Guard1) == "AGE5"] <- "Guard1_Age"
+    names(Guard1)[names(Guard1) == "PLAYER_HEIGHT_INCHES5"] <- "Guard1_Height"
+    names(Guard1)[names(Guard1) == "PLAYER_WEIGHT5"] <- "Guard1_Weight"
+    
+    
+    
+    Guard2 <- lebron23%>%
+      filter(PLAYER_5_NAME == "Jalen Suggs")%>%
+      reframe(DLEBRON5_Percentile,AGE5,PLAYER_HEIGHT_INCHES5,PLAYER_WEIGHT5)
+    
+    names(Guard2)[names(Guard2) == "DLEBRON5_Percentile"] <- "Guard2_DLEBRON"
+    names(Guard2)[names(Guard2) == "AGE5"] <- "Guard2_Age"
+    names(Guard2)[names(Guard2) == "PLAYER_HEIGHT_INCHES5"] <- "Guard2_Height"
+    names(Guard2)[names(Guard2) == "PLAYER_WEIGHT5"] <- "Guard2_Weight"
+    
+    
+    Forward1 <- lebron23%>%
+      filter(PLAYER_5_NAME == "Jonathan Isaac")%>%
+      reframe(DLEBRON5_Percentile,AGE5,PLAYER_HEIGHT_INCHES5,PLAYER_WEIGHT5)
+    
+    names(Forward1)[names(Forward1) == "DLEBRON5_Percentile"] <- "Forward1_DLEBRON"
+    names(Forward1)[names(Forward1) == "AGE5"] <- "Forward1_Age"
+    names(Forward1)[names(Forward1) == "PLAYER_HEIGHT_INCHES5"] <- "Forward1_Height"
+    names(Forward1)[names(Forward1) == "PLAYER_WEIGHT5"] <- "Forward1_Weight"
+    
+    
+    Forward2 <- lebron23%>%
+      filter(PLAYER_5_NAME == "Rudy Gobert")%>%
+      reframe(DLEBRON5_Percentile,AGE5,PLAYER_HEIGHT_INCHES5,PLAYER_WEIGHT5)
+    
+    names(Forward2)[names(Forward2) == "DLEBRON5_Percentile"] <- "Forward2_DLEBRON"
+    names(Forward2)[names(Forward2) == "AGE5"] <- "Forward2_Age"
+    names(Forward2)[names(Forward2) == "PLAYER_HEIGHT_INCHES5"] <- "Forward2_Height"
+    names(Forward2)[names(Forward2) == "PLAYER_WEIGHT5"] <- "Forward2_Weight"
+    
+    
+    Center1 <- lebron23%>%
+      filter(PLAYER_5_NAME == "Victor Wembanyama")%>%
+      reframe(DLEBRON5_Percentile,AGE5,PLAYER_HEIGHT_INCHES5,PLAYER_WEIGHT5)
+    
+    names(Center1)[names(Center1) == "DLEBRON5_Percentile"] <- "Center1_DLEBRON"
+    names(Center1)[names(Center1) == "AGE5"] <- "Center1_Age"
+    names(Center1)[names(Center1) == "PLAYER_HEIGHT_INCHES5"] <- "Center1_Height"
+    names(Center1)[names(Center1) == "PLAYER_WEIGHT5"] <- "Center1_Weight"
+    
+    
+    
+    user_input_df <- cbind(Guard1,Guard2,Forward1,Forward2,Center1)
+    
+    
+    
+    
+    # Getting predictions
+    Def_Rating_preds <- data.frame(predict.lm(lm, newdata = user_input_df)) |> 
+      rename(Def_Rating = predict.lm.lm..newdata...user_input_df.)
+    
+    # Binding it to data frame
+    Def_Rating_projs2 <- cbind(user_input_df, Def_Rating_preds)
+    
+    
+    min_current <- .17
+    max_current <- .77
+    min_new <- 1
+    max_new <- 0
+    
+    # Apply the linear transformation
+    Def_Rating_projs2$adjusted_predictions <- max_new - ( Def_Rating_projs2$Def_Rating - min_current) * (max_new - min_new) / (max_current - min_current)
+    
+    
+
+
+
+
     
     
     
