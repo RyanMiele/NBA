@@ -1,0 +1,998 @@
+
+    #2023-24
+    
+    logos <- hoopR::load_nba_player_box(2024)%>%
+      reframe(athlete_id, athlete_display_name, athlete_position_abbreviation)
+    
+    
+    logos <- logos[!duplicated(logos$athlete_id), ]
+    
+    
+    lineups <- get_lineups(season = "2023",5, 
+                           measure_type = c("Base","Advanced","Misc","Four+Factors","Scoring","Opponent")[2])
+    
+    lineups  <- as.data.frame(lineups)
+    
+    lineups23 <- lineups%>%
+      mutate(year = "2023-24")
+    
+    
+    bio23 <- nba_leaguedashplayerbiostats(season = year_to_season(2023),
+                                        season_type = "Regular Season")
+    
+    bio23 <- as.data.frame(bio23)
+    
+    bio23 <- bio23 %>%
+      rename_with(~str_remove(., 'LeagueDashPlayerBioStats.'))%>%
+      reframe(PLAYER_ID,AGE,PLAYER_HEIGHT_INCHES,PLAYER_WEIGHT)%>%
+      mutate_at(c('AGE', 'PLAYER_HEIGHT_INCHES','PLAYER_WEIGHT'), as.numeric)%>%
+      mutate_at("PLAYER_ID", as.integer)
+    #reframe(PLAYER_ID,AGE,PLAYER_HEIGHT,PLAYER_HEIGHT_INCHES,PLAYER_WEIGHT)
+    
+    
+    
+    
+    
+    # Player 1   
+    
+    
+    
+    
+    
+    lebron23 <- lebron%>%
+      filter(Season == "2023-24")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON1_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON1_Percentile)
+    
+    names(lebron23)[names(lebron23) == "PLAYER_NAME"] <- "PLAYER_1_NAME"
+    names(lebron23)[names(lebron23) == "DLEBRON"] <- "DLEBRON1"
+    
+    
+    lebron23<- left_join(lebron23, logos, by= c("PLAYER_1_NAME"= "athlete_display_name"))
+    lebron23<- left_join(lebron23, bio23, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron23)[names(lebron23) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation1"
+    names(lebron23)[names(lebron23) == "AGE"] <- "AGE1"
+    names(lebron23)[names(lebron23) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES1"
+    names(lebron23)[names(lebron23) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT1"
+    
+    
+    
+    lineups23full <- left_join(lineups23,lebron23, by = c("player_id_1"="PLAYER_ID"))
+    
+    
+    
+    
+    
+    
+    
+    
+    # Player 2
+    
+    
+    
+    
+    lebron23 <- lebron%>%
+      filter(Season == "2023-24")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON2_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON2_Percentile)
+    
+    names(lebron23)[names(lebron23) == "PLAYER_NAME"] <- "PLAYER_2_NAME"
+    names(lebron23)[names(lebron23) == "DLEBRON"] <- "DLEBRON2"
+    
+    
+    
+    
+    lebron23<- left_join(lebron23, logos, by= c("PLAYER_2_NAME"= "athlete_display_name"))
+    lebron23<- left_join(lebron23, bio23, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron23)[names(lebron23) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation2"
+    names(lebron23)[names(lebron23) == "AGE"] <- "AGE2"
+    names(lebron23)[names(lebron23) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES2"
+    names(lebron23)[names(lebron23) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT2"
+    
+    lineups23full <- left_join(lineups23full,lebron23, by = c("player_id_2"="PLAYER_ID"))
+    
+    
+    
+    
+    # Player 3
+    
+    
+    
+    
+    lebron23 <- lebron%>%
+      filter(Season == "2023-24")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON3_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON3_Percentile)
+    
+    names(lebron23)[names(lebron23) == "PLAYER_NAME"] <- "PLAYER_3_NAME"
+    names(lebron23)[names(lebron23) == "DLEBRON"] <- "DLEBRON3"
+    
+    
+    
+    lebron23<- left_join(lebron23, logos, by= c("PLAYER_3_NAME"= "athlete_display_name"))
+    lebron23<- left_join(lebron23, bio23, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron23)[names(lebron23) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation3"
+    names(lebron23)[names(lebron23) == "AGE"] <- "AGE3"
+    names(lebron23)[names(lebron23) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES3"
+    names(lebron23)[names(lebron23) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT3"
+    
+    lineups23full <- left_join(lineups23full,lebron23, by = c("player_id_3"="PLAYER_ID"))
+    
+    
+    
+    # Player 4
+    
+    
+    
+    
+    lebron23 <- lebron%>%
+      filter(Season == "2023-24")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON4_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON4_Percentile)
+    
+    names(lebron23)[names(lebron23) == "PLAYER_NAME"] <- "PLAYER_4_NAME"
+    names(lebron23)[names(lebron23) == "DLEBRON"] <- "DLEBRON4"
+    
+    
+    
+    lebron23<- left_join(lebron23, logos, by= c("PLAYER_4_NAME"= "athlete_display_name"))
+    lebron23<- left_join(lebron23, bio23, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron23)[names(lebron23) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation4"
+    names(lebron23)[names(lebron23) == "AGE"] <- "AGE4"
+    names(lebron23)[names(lebron23) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES4"
+    names(lebron23)[names(lebron23) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT4"
+    
+    lineups23full <- left_join(lineups23full,lebron23, by = c("player_id_4"="PLAYER_ID"))
+    
+    
+    
+    # Player 5
+    
+    
+    
+    
+    lebron23 <- lebron%>%
+      filter(Season == "2023-24")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON5_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON5_Percentile)
+    
+    names(lebron23)[names(lebron23) == "PLAYER_NAME"] <- "PLAYER_5_NAME"
+    names(lebron23)[names(lebron23) == "DLEBRON"] <- "DLEBRON5"
+    
+    
+    
+    lebron23<- left_join(lebron23, logos, by= c("PLAYER_5_NAME"= "athlete_display_name"))
+    lebron23<- left_join(lebron23, bio23, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron23)[names(lebron23) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation5"
+    names(lebron23)[names(lebron23) == "AGE"] <- "AGE5"
+    names(lebron23)[names(lebron23) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES5"
+    names(lebron23)[names(lebron23) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT5"
+    
+    lineups23full <- left_join(lineups23full,lebron23, by = c("player_id_5"="PLAYER_ID"))
+    
+    
+    
+    
+    
+    #2022-23
+    
+    logos <- hoopR::load_nba_player_box(2023)%>%
+      reframe(athlete_id, athlete_display_name, athlete_position_abbreviation)
+    
+    logos <- logos[!duplicated(logos$athlete_id), ]
+    
+    
+    
+    
+    lineups <- get_lineups(season = "2022",5, 
+                           measure_type = c("Base","Advanced","Misc","Four+Factors","Scoring","Opponent")[2])
+    
+    
+    lineups  <- as.data.frame(lineups)
+    
+    
+    lineups22 <- lineups%>%
+      mutate(year = "2022-23")
+    
+    
+    bio22 <- nba_leaguedashplayerbiostats(season = year_to_season(2022),
+                                          season_type = "Regular Season")
+    
+    bio22 <- as.data.frame(bio22)
+    
+    bio22 <- bio22 %>%
+      rename_with(~str_remove(., 'LeagueDashPlayerBioStats.'))%>%
+      reframe(PLAYER_ID,AGE,PLAYER_HEIGHT_INCHES,PLAYER_WEIGHT)%>%
+      mutate_at(c('AGE', 'PLAYER_HEIGHT_INCHES','PLAYER_WEIGHT'), as.numeric)%>%
+      mutate_at("PLAYER_ID", as.integer)
+    #reframe(PLAYER_ID,AGE,PLAYER_HEIGHT,PLAYER_HEIGHT_INCHES,PLAYER_WEIGHT)
+    
+    
+    
+    # Player 1   
+    
+    
+    
+    
+    
+    lebron22 <- lebron%>%
+      filter(Season == "2022-23")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON1_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON1_Percentile)
+    
+    names(lebron22)[names(lebron22) == "PLAYER_NAME"] <- "PLAYER_1_NAME"
+    names(lebron22)[names(lebron22) == "DLEBRON"] <- "DLEBRON1"
+    
+    
+    
+    lebron22<- left_join(lebron22, logos, by= c("PLAYER_1_NAME"= "athlete_display_name"))
+    lebron22<- left_join(lebron22, bio22, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron22)[names(lebron22) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation1"
+    names(lebron22)[names(lebron22) == "AGE"] <- "AGE1"
+    names(lebron22)[names(lebron22) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES1"
+    names(lebron22)[names(lebron22) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT1"
+    
+    lineups22full <- left_join(lineups22,lebron22, by = c("player_id_1"="PLAYER_ID"))
+    
+    
+    # Player 2
+    
+    
+    
+    
+    lebron22 <- lebron%>%
+      filter(Season == "2022-23")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON2_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON2_Percentile)
+    
+    names(lebron22)[names(lebron22) == "PLAYER_NAME"] <- "PLAYER_2_NAME"
+    names(lebron22)[names(lebron22) == "DLEBRON"] <- "DLEBRON2"
+    
+    
+    
+    
+    lebron22<- left_join(lebron22, logos, by= c("PLAYER_2_NAME"= "athlete_display_name"))
+    
+    lebron22<- left_join(lebron22, bio22, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron22)[names(lebron22) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation2"
+    names(lebron22)[names(lebron22) == "AGE"] <- "AGE2"
+    names(lebron22)[names(lebron22) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES2"
+    names(lebron22)[names(lebron22) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT2"
+    
+    lineups22full <- left_join(lineups22full,lebron22, by = c("player_id_2"="PLAYER_ID"))
+    
+    
+    
+    
+    # Player 3
+    
+    
+    
+    
+    lebron22 <- lebron%>%
+      filter(Season == "2022-23")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON3_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON3_Percentile)
+    
+    names(lebron22)[names(lebron22) == "PLAYER_NAME"] <- "PLAYER_3_NAME"
+    names(lebron22)[names(lebron22) == "DLEBRON"] <- "DLEBRON3"
+    
+    
+    
+    
+    
+    
+    
+    
+    lebron22<- left_join(lebron22, logos, by= c("PLAYER_3_NAME"= "athlete_display_name"))
+    
+    lebron22<- left_join(lebron22, bio22, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron22)[names(lebron22) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation3"
+    names(lebron22)[names(lebron22) == "AGE"] <- "AGE3"
+    names(lebron22)[names(lebron22) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES3"
+    names(lebron22)[names(lebron22) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT3"
+    
+    lineups22full <- left_join(lineups22full,lebron22, by = c("player_id_3"="PLAYER_ID"))
+    
+    
+    
+    # Player 4
+    
+    
+    
+    
+    lebron22 <- lebron%>%
+      filter(Season == "2022-23")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON4_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON4_Percentile)
+    
+    names(lebron22)[names(lebron22) == "PLAYER_NAME"] <- "PLAYER_4_NAME"
+    names(lebron22)[names(lebron22) == "DLEBRON"] <- "DLEBRON4"
+    
+    
+    
+    lebron22<- left_join(lebron22, logos, by= c("PLAYER_4_NAME"= "athlete_display_name"))
+    lebron22<- left_join(lebron22, bio22, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron22)[names(lebron22) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation4"
+    names(lebron22)[names(lebron22) == "AGE"] <- "AGE4"
+    names(lebron22)[names(lebron22) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES4"
+    names(lebron22)[names(lebron22) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT4"
+    
+    lineups22full <- left_join(lineups22full,lebron22, by = c("player_id_4"="PLAYER_ID"))
+    
+    
+    
+    # Player 5
+    
+    
+    
+    
+    lebron22 <- lebron%>%
+      filter(Season == "2022-23")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON5_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON5_Percentile)
+    
+    names(lebron22)[names(lebron22) == "PLAYER_NAME"] <- "PLAYER_5_NAME"
+    names(lebron22)[names(lebron22) == "DLEBRON"] <- "DLEBRON5"
+    
+    
+    
+    
+    lebron22<- left_join(lebron22, logos, by= c("PLAYER_5_NAME"= "athlete_display_name"))
+    
+    lebron22<- left_join(lebron22, bio22, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron22)[names(lebron22) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation5"
+    names(lebron22)[names(lebron22) == "AGE"] <- "AGE5"
+    names(lebron22)[names(lebron22) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES5"
+    names(lebron22)[names(lebron22) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT5"
+    
+    lineups22full <- left_join(lineups22full,lebron22, by = c("player_id_5"="PLAYER_ID"))
+    
+    
+    
+    
+    
+    
+    #2021-22
+    
+    logos <- hoopR::load_nba_player_box(2022)%>%
+      reframe(athlete_id, athlete_display_name, athlete_position_abbreviation)
+    
+    
+    logos <- logos[!duplicated(logos$athlete_id), ]
+    
+    
+    
+    
+    lineups <- get_lineups(season = "2021",5,
+                           measure_type = c("Base","Advanced","Misc","Four+Factors","Scoring","Opponent")[2])
+    
+    
+    lineups  <- as.data.frame(lineups)
+    
+    
+    lineups21 <- lineups%>%
+      mutate(year = "2021-22")
+    
+    
+    bio21 <- nba_leaguedashplayerbiostats(season = year_to_season(2021),
+                                          season_type = "Regular Season")
+    
+    bio21 <- as.data.frame(bio21)
+    
+    bio21 <- bio21 %>%
+      rename_with(~str_remove(., 'LeagueDashPlayerBioStats.'))%>%
+      reframe(PLAYER_ID,AGE,PLAYER_HEIGHT_INCHES,PLAYER_WEIGHT)%>%
+      mutate_at(c('AGE', 'PLAYER_HEIGHT_INCHES','PLAYER_WEIGHT'), as.numeric)%>%
+      mutate_at("PLAYER_ID", as.integer)
+    #reframe(PLAYER_ID,AGE,PLAYER_HEIGHT,PLAYER_HEIGHT_INCHES,PLAYER_WEIGHT)
+    
+    
+    
+    
+    
+    # Player 1   
+    
+    
+    
+    
+    
+    lebron21 <- lebron%>%
+      filter(Season == "2021-22")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON1_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON1_Percentile)
+    
+    names(lebron21)[names(lebron21) == "PLAYER_NAME"] <- "PLAYER_1_NAME"
+    names(lebron21)[names(lebron21) == "DLEBRON"] <- "DLEBRON1"
+    
+    
+    
+    lebron21<- left_join(lebron21, logos, by= c("PLAYER_1_NAME"= "athlete_display_name"))
+    
+    lebron21<- left_join(lebron21, bio21, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron21)[names(lebron21) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation1"
+    names(lebron21)[names(lebron21) == "AGE"] <- "AGE1"
+    names(lebron21)[names(lebron21) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES1"
+    names(lebron21)[names(lebron21) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT1"
+    
+    lineups21full <- left_join(lineups21,lebron21, by = c("player_id_1"="PLAYER_ID"))
+    
+    
+    # Player 2
+    
+    
+    
+    
+    lebron21 <- lebron%>%
+      filter(Season == "2021-22")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON2_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON2_Percentile)
+    
+    names(lebron21)[names(lebron21) == "PLAYER_NAME"] <- "PLAYER_2_NAME"
+    names(lebron21)[names(lebron21) == "DLEBRON"] <- "DLEBRON2"
+    
+    
+    
+    lebron21<- left_join(lebron21, logos, by= c("PLAYER_2_NAME"= "athlete_display_name"))
+    lebron21<- left_join(lebron21, bio21, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron21)[names(lebron21) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation2"
+    names(lebron21)[names(lebron21) == "AGE"] <- "AGE2"
+    names(lebron21)[names(lebron21) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES2"
+    names(lebron21)[names(lebron21) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT2"
+    lineups21full <- left_join(lineups21full,lebron21, by = c("player_id_2"="PLAYER_ID"))
+    
+    
+    
+    
+    # Player 3
+    
+    
+    
+    
+    lebron21 <- lebron%>%
+      filter(Season == "2021-22")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON3_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON3_Percentile)
+    
+    names(lebron21)[names(lebron21) == "PLAYER_NAME"] <- "PLAYER_3_NAME"
+    names(lebron21)[names(lebron21) == "DLEBRON"] <- "DLEBRON3"
+    
+    
+    
+    lebron21<- left_join(lebron21, logos, by= c("PLAYER_3_NAME"= "athlete_display_name"))
+    lebron21<- left_join(lebron21, bio21, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron21)[names(lebron21) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation3"
+    names(lebron21)[names(lebron21) == "AGE"] <- "AGE3"
+    names(lebron21)[names(lebron21) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES3"
+    names(lebron21)[names(lebron21) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT3"
+    
+    lineups21full <- left_join(lineups21full,lebron21, by = c("player_id_3"="PLAYER_ID"))
+    
+    
+    
+    # Player 4
+    
+    
+    
+    
+    lebron21 <- lebron%>%
+      filter(Season == "2021-22")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON4_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON4_Percentile)
+    
+    names(lebron21)[names(lebron21) == "PLAYER_NAME"] <- "PLAYER_4_NAME"
+    names(lebron21)[names(lebron21) == "DLEBRON"] <- "DLEBRON4"
+    
+    
+    
+    lebron21<- left_join(lebron21, logos, by= c("PLAYER_4_NAME"= "athlete_display_name"))
+    
+    lebron21<- left_join(lebron21, bio21, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron21)[names(lebron21) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation4"
+    names(lebron21)[names(lebron21) == "AGE"] <- "AGE4"
+    names(lebron21)[names(lebron21) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES4"
+    names(lebron21)[names(lebron21) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT4"
+    
+    lineups21full <- left_join(lineups21full,lebron21, by = c("player_id_4"="PLAYER_ID"))
+    
+    
+    
+    # Player 5
+    
+    
+    
+    
+    lebron21 <- lebron%>%
+      filter(Season == "2021-22")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON5_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON5_Percentile)
+    
+    names(lebron21)[names(lebron21) == "PLAYER_NAME"] <- "PLAYER_5_NAME"
+    names(lebron21)[names(lebron21) == "DLEBRON"] <- "DLEBRON5"
+    
+    
+    
+    lebron21<- left_join(lebron21, logos, by= c("PLAYER_5_NAME"= "athlete_display_name"))
+    lebron21<- left_join(lebron21, bio21, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron21)[names(lebron21) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation5"
+    names(lebron21)[names(lebron21) == "AGE"] <- "AGE5"
+    names(lebron21)[names(lebron21) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES5"
+    names(lebron21)[names(lebron21) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT5"
+    
+    lineups21full <- left_join(lineups21full,lebron21, by = c("player_id_5"="PLAYER_ID"))
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    #2020-21
+    
+    logos <- hoopR::load_nba_player_box(2021)%>%
+      reframe(athlete_id, athlete_display_name, athlete_position_abbreviation)
+    
+    
+    logos <- logos[!duplicated(logos$athlete_id), ]
+    
+    
+    
+    
+    lineups <- get_lineups(season = "2020",5,
+                           measure_type = c("Base","Advanced","Misc","Four+Factors","Scoring","Opponent")[2])
+    
+    
+    lineups  <- as.data.frame(lineups)
+    
+    
+    lineups20 <- lineups%>%
+      mutate(year = "2020-21")
+    
+    
+    bio20 <- nba_leaguedashplayerbiostats(season = year_to_season(2020),
+                                          season_type = "Regular Season")
+    
+    bio20 <- as.data.frame(bio20)
+    
+    bio20 <- bio20 %>%
+      rename_with(~str_remove(., 'LeagueDashPlayerBioStats.'))%>%
+      reframe(PLAYER_ID,AGE,PLAYER_HEIGHT_INCHES,PLAYER_WEIGHT)%>%
+      mutate_at(c('AGE', 'PLAYER_HEIGHT_INCHES','PLAYER_WEIGHT'), as.numeric)%>%
+      mutate_at("PLAYER_ID", as.integer)
+    #reframe(PLAYER_ID,AGE,PLAYER_HEIGHT,PLAYER_HEIGHT_INCHES,PLAYER_WEIGHT)
+    
+    
+    
+    
+    
+    # Player 1   
+    
+    
+    lebron20 <- lebron%>%
+      filter(Season == "2020-21")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON1_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON1_Percentile)
+    
+    names(lebron20)[names(lebron20) == "PLAYER_NAME"] <- "PLAYER_1_NAME"
+    names(lebron20)[names(lebron20) == "DLEBRON"] <- "DLEBRON1"
+    
+    
+    
+    lebron20<- left_join(lebron20, logos, by= c("PLAYER_1_NAME"= "athlete_display_name"))
+    lebron20<- left_join(lebron20, bio20, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron20)[names(lebron20) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation1"
+    names(lebron20)[names(lebron20) == "AGE"] <- "AGE1"
+    names(lebron20)[names(lebron20) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES1"
+    names(lebron20)[names(lebron20) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT1"
+    
+    lineups20full <- left_join(lineups20,lebron20, by = c("player_id_1"="PLAYER_ID"))
+    
+    
+    # Player 2
+    
+    
+    
+    
+    lebron20 <- lebron%>%
+      filter(Season == "2020-21")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON2_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON2_Percentile)
+    
+    names(lebron20)[names(lebron20) == "PLAYER_NAME"] <- "PLAYER_2_NAME"
+    names(lebron20)[names(lebron20) == "DLEBRON"] <- "DLEBRON2"
+    
+    
+    
+    lebron20<- left_join(lebron20, logos, by= c("PLAYER_2_NAME"= "athlete_display_name"))
+    
+    lebron20<- left_join(lebron20, bio20, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron20)[names(lebron20) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation2"
+    names(lebron20)[names(lebron20) == "AGE"] <- "AGE2"
+    names(lebron20)[names(lebron20) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES2"
+    names(lebron20)[names(lebron20) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT2"
+    
+    lineups20full <- left_join(lineups20full,lebron20, by = c("player_id_2"="PLAYER_ID"))
+    
+    
+    
+    
+    # Player 3
+    
+    
+    
+    
+    lebron20 <- lebron%>%
+      filter(Season == "2020-21")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON3_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON3_Percentile)
+    
+    names(lebron20)[names(lebron20) == "PLAYER_NAME"] <- "PLAYER_3_NAME"
+    names(lebron20)[names(lebron20) == "DLEBRON"] <- "DLEBRON3"
+    
+    
+    
+    lebron20<- left_join(lebron20, logos, by= c("PLAYER_3_NAME"= "athlete_display_name"))
+    lebron20<- left_join(lebron20, bio20, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron20)[names(lebron20) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation3"
+    names(lebron20)[names(lebron20) == "AGE"] <- "AGE3"
+    names(lebron20)[names(lebron20) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES3"
+    names(lebron20)[names(lebron20) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT3"
+    
+    lineups20full <- left_join(lineups20full,lebron20, by = c("player_id_3"="PLAYER_ID"))
+    
+    
+    
+    # Player 4
+    
+    
+    
+    
+    lebron20 <- lebron%>%
+      filter(Season == "2020-21")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON4_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON4_Percentile)
+    
+    names(lebron20)[names(lebron20) == "PLAYER_NAME"] <- "PLAYER_4_NAME"
+    names(lebron20)[names(lebron20) == "DLEBRON"] <- "DLEBRON4"
+    
+    
+    
+    lebron20<- left_join(lebron20, logos, by= c("PLAYER_4_NAME"= "athlete_display_name"))
+    
+    lebron20<- left_join(lebron20, bio20, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron20)[names(lebron20) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation4"
+    names(lebron20)[names(lebron20) == "AGE"] <- "AGE4"
+    names(lebron20)[names(lebron20) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES4"
+    names(lebron20)[names(lebron20) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT4"
+    
+    lineups20full <- left_join(lineups20full,lebron20, by = c("player_id_4"="PLAYER_ID"))
+    
+    
+    
+    # Player 5
+    
+    
+    
+    
+    lebron20 <- lebron%>%
+      filter(Season == "2020-21")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON5_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON5_Percentile)
+    
+    names(lebron20)[names(lebron20) == "PLAYER_NAME"] <- "PLAYER_5_NAME"
+    names(lebron20)[names(lebron20) == "DLEBRON"] <- "DLEBRON5"
+    
+    
+    
+    lebron20<- left_join(lebron20, logos, by= c("PLAYER_5_NAME"= "athlete_display_name"))
+    
+    lebron20<- left_join(lebron20, bio20, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron20)[names(lebron20) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation5"
+    names(lebron20)[names(lebron20) == "AGE"] <- "AGE5"
+    names(lebron20)[names(lebron20) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES5"
+    names(lebron20)[names(lebron20) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT5"
+    
+    lineups20full <- left_join(lineups20full,lebron20, by = c("player_id_5"="PLAYER_ID"))
+    
+    
+    
+    
+    
+    #2019-20
+    
+    logos <- hoopR::load_nba_player_box(2020)%>%
+      reframe(athlete_id, athlete_display_name, athlete_position_abbreviation)
+    
+    logos <- logos[!duplicated(logos$athlete_id), ]
+    
+    lineups <- get_lineups(season = "2019",5,
+                           measure_type = c("Base","Advanced","Misc","Four+Factors","Scoring","Opponent")[2])
+    
+    
+    lineups  <- as.data.frame(lineups)
+    
+    
+    lineups19 <- lineups%>%
+      mutate(year = "2019-2020")
+    
+    
+    bio19 <- nba_leaguedashplayerbiostats(season = year_to_season(2019),
+                                          season_type = "Regular Season")
+    
+    bio19 <- as.data.frame(bio19)
+    
+    bio19 <- bio19 %>%
+      rename_with(~str_remove(., 'LeagueDashPlayerBioStats.'))%>%
+      reframe(PLAYER_ID,AGE,PLAYER_HEIGHT_INCHES,PLAYER_WEIGHT)%>%
+      mutate_at(c('AGE', 'PLAYER_HEIGHT_INCHES','PLAYER_WEIGHT'), as.numeric)%>%
+      mutate_at("PLAYER_ID", as.integer)
+    #reframe(PLAYER_ID,AGE,PLAYER_HEIGHT,PLAYER_HEIGHT_INCHES,PLAYER_WEIGHT)
+    
+    
+    
+    
+    
+    # Player 1   
+    
+    
+    
+    
+    
+    lebron19 <- lebron%>%
+      filter(Season == "2019-20")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON1_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON1_Percentile)
+    
+    names(lebron19)[names(lebron19) == "PLAYER_NAME"] <- "PLAYER_1_NAME"
+    names(lebron19)[names(lebron19) == "DLEBRON"] <- "DLEBRON1"
+    
+    
+    
+    lebron19<- left_join(lebron19, logos, by= c("PLAYER_1_NAME"= "athlete_display_name"))
+    
+    lebron19<- left_join(lebron19, bio19, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron19)[names(lebron19) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation1"
+    names(lebron19)[names(lebron19) == "AGE"] <- "AGE1"
+    names(lebron19)[names(lebron19) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES1"
+    names(lebron19)[names(lebron19) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT1"
+    
+    
+    lineups19full <- left_join(lineups19,lebron19, by = c("player_id_1"="PLAYER_ID"))
+    
+    
+    # Player 2
+    
+    
+    
+    
+    lebron19 <- lebron%>%
+      filter(Season == "2019-20")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON2_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON2_Percentile)
+    
+    names(lebron19)[names(lebron19) == "PLAYER_NAME"] <- "PLAYER_2_NAME"
+    names(lebron19)[names(lebron19) == "DLEBRON"] <- "DLEBRON2"
+    
+    
+    
+    lebron19<- left_join(lebron19, logos, by= c("PLAYER_2_NAME"= "athlete_display_name"))
+    
+    lebron19<- left_join(lebron19, bio19, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron19)[names(lebron19) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation2"
+    names(lebron19)[names(lebron19) == "AGE"] <- "AGE2"
+    names(lebron19)[names(lebron19) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES2"
+    names(lebron19)[names(lebron19) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT2"
+    
+    lineups19full <- left_join(lineups19full,lebron19, by = c("player_id_2"="PLAYER_ID"))
+    
+    
+    
+    
+    # Player 3
+    
+    
+    
+    
+    lebron19 <- lebron%>%
+      filter(Season == "2019-20")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON3_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON3_Percentile)
+    
+    names(lebron19)[names(lebron19) == "PLAYER_NAME"] <- "PLAYER_3_NAME"
+    names(lebron19)[names(lebron19) == "DLEBRON"] <- "DLEBRON3"
+    
+    
+    lebron19<- left_join(lebron19, logos, by= c("PLAYER_3_NAME"= "athlete_display_name"))
+    
+    lebron19<- left_join(lebron19, bio19, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron19)[names(lebron19) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation3"
+    names(lebron19)[names(lebron19) == "AGE"] <- "AGE3"
+    names(lebron19)[names(lebron19) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES3"
+    names(lebron19)[names(lebron19) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT3"
+    
+    lineups19full <- left_join(lineups19full,lebron19, by = c("player_id_3"="PLAYER_ID"))
+    
+    
+    
+    # Player 4
+    
+    
+    
+    
+    lebron19 <- lebron%>%
+      filter(Season == "2019-20")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON4_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON4_Percentile)
+    
+    names(lebron19)[names(lebron19) == "PLAYER_NAME"] <- "PLAYER_4_NAME"
+    names(lebron19)[names(lebron19) == "DLEBRON"] <- "DLEBRON4"
+    
+    lebron19<- left_join(lebron19, logos, by= c("PLAYER_4_NAME"= "athlete_display_name"))
+    
+    lebron19<- left_join(lebron19, bio19, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron19)[names(lebron19) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation4"
+    names(lebron19)[names(lebron19) == "AGE"] <- "AGE4"
+    names(lebron19)[names(lebron19) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES4"
+    names(lebron19)[names(lebron19) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT4"
+    
+    lineups19full <- left_join(lineups19full,lebron19, by = c("player_id_4"="PLAYER_ID"))
+    
+    
+    
+    # Player 5
+    
+    
+    
+    
+    lebron19 <- lebron%>%
+      filter(Season == "2019-20")%>%
+      #mutate_at("PLAYER_ID", as.character)%>%
+      mutate(DLEBRON5_Percentile = rank(DLEBRON)/length(DLEBRON),
+             OLEBRON_Percentile = rank(OLEBRON)/length(OLEBRON))%>%
+      reframe(Season,PLAYER_NAME,PLAYER_ID,Mins,DLEBRON,DLEBRON5_Percentile)
+    
+    names(lebron19)[names(lebron19) == "PLAYER_NAME"] <- "PLAYER_5_NAME"
+    names(lebron19)[names(lebron19) == "DLEBRON"] <- "DLEBRON5"
+    
+    
+    
+    lebron19<- left_join(lebron19, logos, by= c("PLAYER_5_NAME"= "athlete_display_name"))
+    
+    lebron19<- left_join(lebron19, bio19, by = ("PLAYER_ID"))
+    
+    
+    
+    names(lebron19)[names(lebron19) == "athlete_position_abbreviation"] <- "athlete_position_abbreviation5"
+    names(lebron19)[names(lebron19) == "AGE"] <- "AGE5"
+    names(lebron19)[names(lebron19) == "PLAYER_HEIGHT_INCHES"] <- "PLAYER_HEIGHT_INCHES5"
+    names(lebron19)[names(lebron19) == "PLAYER_WEIGHT"] <- "PLAYER_WEIGHT5"
+    
+    lineups19full <- left_join(lineups19full,lebron19, by = c("player_id_5"="PLAYER_ID"))
+    
+    
+    
+    
+    
+    
