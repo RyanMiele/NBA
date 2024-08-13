@@ -47,25 +47,9 @@ library(NBAr)
 
 
 
-#rsconnect::deployApp('/Users/ryanmiele/Library/Mobile Documents/com~apple~CloudDocs/R Projects/NYG/NFL/MLB Pitcher Scouter')
-
-#rsconnect::deployApp('MLB Pitch Scouter.R')
-# 
-# library(rsconnect)
-# rsconnect::deployApp("/Users/ryanmiele/Library/Mobile Documents/com~apple~CloudDocs/R Projects/NYG/NFL/MLB Pitcher Scouter")
 
 
-
-# 
-# 
-# csv_file <- "/Users/ryanmiele/Library/Mobile Documents/com~apple~CloudDocs/R Projects/MLB/Pitcher_Situation_Scouter_App/SavantHittingData23.csv"  # Specify relative path
-# 
-# # Load CSV data within Shiny app
-# SavantData23 <- read.csv(csv_file)
-# 
-
-
-
+#Load DLEBRON Data
 
 
 lebron <- read.csv("LEBRON.csv", header = TRUE, sep = ",")
@@ -76,7 +60,7 @@ lebron <- lebron%>%
 
 
 
-
+# Load Lineup Data for the last 5 seasons and join DLEBRON for each player
 
 #2023-24
 
@@ -1078,37 +1062,18 @@ lineups19full <- left_join(lineups19full,lebron19, by = c("player_id_5"="PLAYER_
 
 
 
-# 
-# guard_1 <- unique(lebron23$PLAYER_5_NAME)
-# guard_2 <- unique(lebron23$PLAYER_5_NAME)
-# forward_1 <- unique(lebron23$PLAYER_5_NAME)
-# forward_2 <- unique(lebron23$PLAYER_5_NAME)
-# center <- unique(lebron23$PLAYER_5_NAME)
-# 
-# 
-# 
-# stand <- unique(calcs$stand)
-# balls <- unique(calcs$balls)
-# strikes <- unique(calcs$strikes)
-# batter_strength<- unique(all_batters_total$batter_strength)
-# pitchtype<- unique(calcs$pitch_name)
-# 
-# 
-# 
-# 
-# 
-# 
-# stand2 <- unique(calcs$stand)
-# balls2 <- unique(calcs$balls)
-# strikes2 <- unique(calcs$strikes)
-# batter_strength2<- unique(calcs$batter_strength)
-# 
-# 
 
 
 
+
+
+#Join the last 5 seasons into 1 DF
 
 lineups_last_five5 <- rbind(lineups19full,lineups20full,lineups21full,lineups22full,lineups23full)
+
+
+
+
 
 
 lineup_calc_C <- lineups_last_five5%>%
@@ -1275,13 +1240,10 @@ rearrange_positions <- function(row) {
   )
 }
 
-# Apply the function to each row of the dataframe
 df_new <- t(apply(lineup_calc_C, 1, function(row) as.numeric(rearrange_positions(row))))
 
-# Convert the result to a dataframe
 df_new <- as.data.frame(df_new)
 
-# Set column names
 colnames(df_new) <- c(
   "Guard1_Height", "Guard1_Weight", "Guard1_DLEBRON", "Guard1_Age",
   "Guard2_Height", "Guard2_Weight", "Guard2_DLEBRON", "Guard2_Age",
@@ -1300,10 +1262,10 @@ df_new <- df_new%>%
 
 
 
+# Model
 
 
 lm <- lm(Def_Rating_Percentile ~ .,data = df_new)
-
 
 
 
@@ -1328,15 +1290,28 @@ height <- height %>%
 
 
 
+g1_list <- lebron23%>%
+  filter(athlete_position_abbreviation5 == "G"|
+           athlete_position_abbreviation5 == "SG"|
+           athlete_position_abbreviation5 == "PG")
+
+g2_list <- lebron23%>%
+  filter(athlete_position_abbreviation5 != "C")
+
+c_list <- lebron23%>%
+  filter(athlete_position_abbreviation5 != "G"&
+           athlete_position_abbreviation5 != "SG"&
+           athlete_position_abbreviation5 != "PG")
 
 
 
 
-guard_1 <- unique(lebron23$PLAYER_5_NAME)
-guard_2 <- unique(lebron23$PLAYER_5_NAME)
+
+guard_1 <- unique(g1_list$PLAYER_5_NAME)
+guard_2 <- unique(g2_list$PLAYER_5_NAME)
 forward_1 <- unique(lebron23$PLAYER_5_NAME)
 forward_2 <- unique(lebron23$PLAYER_5_NAME)
-center <- unique(lebron23$PLAYER_5_NAME)
+center <- unique(c_list$PLAYER_5_NAME)
 
 
 
@@ -1354,9 +1329,16 @@ ui <- fluidPage(
   
   
   
-  sidebarPanel(width = 2,
+  sidebarPanel(width = 3,
                tags$h5("Select a 5 Man Lineup",align = "center"),
-               tags$h5("The Model Will Predict the Lineup's Defensive Rating Percentile",align = "center")),
+               br(),
+               br(),
+               tags$h5("The Model will Predict the Lineup's",align = "center"),
+               tags$h5("Defensive Rating Percentile",align = "center"),
+               br(),
+               br(),
+               tags$h5("Each Player's Height and DLEBRON",align = "center"),
+               tags$h5("Percentile is Displayed",align = "center")),
   
   
   
@@ -1366,139 +1348,88 @@ ui <- fluidPage(
                tabPanel("Custom Defensive Lineup Model",
                         fluidRow(
                             column(6, align = "center",
-                                   plotOutput("guard_1_headshot",height = 100),
+                                   plotOutput("guard_1_headshot",height = 95),
                                    selectizeInput(inputId = "playerchoose1", label = "Guard 1",
                                                   c(sort(unique(as.character(guard_1)))),
                                                   selected = "Jalen Suggs"),
+                                   
                                    plotOutput("guard_1_details",height = 100)),
                             
                             column(6, align = "center",
-                                   plotOutput("guard_2_headshot",height = 100),
+                                   plotOutput("guard_2_headshot",height = 95),
                                    selectizeInput(inputId = "playerchoose2", label = "Guard 2",
                                                   c(sort(unique(as.character(guard_2)))),
-                                                  selected = "CJ McCollum"),
+                                                  selected = "Devin Booker"),
+                                   
                                    plotOutput("guard_2_details",height = 100)),
                             
                             column(4, align = "center",
-                                   plotOutput("forward_1_headshot",height = 100),
-                                   selectizeInput(inputId = "playerchoose3", label = "Forward 1",
+                                   plotOutput("forward_1_headshot",height = 95),
+                                   selectizeInput(inputId = "playerchoose3", label = "Guard / Forward",
                                                   c(sort(unique(as.character(forward_1)))),
                                                   selected = "Herbert Jones"),
+                                   
                                    plotOutput("forward_1_details",height = 100)),
                             
                             br(),
                             column(4, align = "center",
-                                   plotOutput("center_headshot",height = 100),
+                                   plotOutput("center_headshot",height = 95),
                                    selectizeInput(inputId = "playerchoose5", label = "Center",
                                                   c(sort(unique(as.character(center)))),
-                                                  selected = "Rudy Gobert"),
+                                                  selected = "Anthony Davis"),
+                                   
                                    plotOutput("center_details",height = 100)),
                             
                             column(4, align = "center",
-                                   plotOutput("forward_2_headshot",height = 100),
-                                   selectizeInput(inputId = "playerchoose4", label = "Forward 2",
+                                   plotOutput("forward_2_headshot",height = 95),
+                                   selectizeInput(inputId = "playerchoose4", label = "Forward",
                                                   c(sort(unique(as.character(forward_2)))),
-                                                  selected = "Chet Holmgren"),
+                                                  selected = "Domantas Sabonis"),
+                                  
                                    plotOutput("forward_2_details",height = 100)),
                             column(12, align = "center",
                                    plotOutput("kpi_chart",height = 250)),
                           )),
-  #   column(4, align = "center",
-  #          plotOutput("pitcher_head_shot",height = 100)),
-  #   column(8, align = "center",
-  #          tableOutput("situation")),
-  #   column(12, align = "center",
-  #          tableOutput("pitch_frequency")),
-  #   column(7, align = "center",
-  #          tableOutput("top_five")),
-  #   column(5, align = "center",
-  #          plotOutput("loc_chart",height = 250)),
-  # )),
-                        #   column(2.4, align = "center",
-                        #          plotOutput("guard_1_headshot",height = 100),
-                        #          selectizeInput(inputId = "playerchoose1", label = "Guard 1",
-                        #                         c(sort(unique(as.character(guard_1)))),
-                        #                         selected = "Jalen Suggs"),
-                        #          plotOutput("guard_1_details",height = 100)),
-                        #   column(2.4, align = "center",
-                        #          plotOutput("guard_2_headshot",height = 100),
-                        #          selectizeInput(inputId = "playerchoose2", label = "Guard 2",
-                        #                         c(sort(unique(as.character(guard_2)))),
-                        #                         selected = "CJ McCollum"),
-                        #          plotOutput("guard_2_details",height = 100)),
-                        #   column(2.4, align = "center",
-                        #          plotOutput("forward_1_headshot",height = 100),
-                        #          selectizeInput(inputId = "playerchoose3", label = "Forward 1",
-                        #                         c(sort(unique(as.character(forward_1)))),
-                        #                         selected = "Herbert Jones"),
-                        #          plotOutput("forward_1_details",height = 100)),
-                        #   column(2.4, align = "center",
-                        #          plotOutput("forward_2_headshot",height = 100),
-                        #          selectizeInput(inputId = "playerchoose4", label = "Forward 2",
-                        #                         c(sort(unique(as.character(forward_2)))),
-                        #                         selected = "Chet Holmgren"),
-                        #          plotOutput("forward_2_details",height = 100)),
-                        #   column(2.4, align = "center",
-                        #          plotOutput("center_headshot",height = 100),
-                        #          selectizeInput(inputId = "playerchoose5", label = "Center",
-                        #                         c(sort(unique(as.character(center)))),
-                        #                         selected = "Rudy Gobert"),
-                        #          plotOutput("center_details",height = 100)),
-                        #   column(12, align = "center",
-                        #          plotOutput("kpi_chart",height = 250)),
-                        # )),
-               # column(2.4, align = "center",
-               #        selectizeInput(inputId = "playerchoose1", label = "Guard 1",
-               #                       c(sort(unique(as.character(guard_1)))),
-               #                       selected = "Jalen Suggs")),
-               # column(2.4, align = "center",
-               #        selectizeInput(inputId = "playerchoose2", label = "Guard 2",
-               #                       c(sort(unique(as.character(guard_2)))),
-               #                       selected = "CJ McCollum")),
-               # column(2.4, align = "center",
-               #        selectizeInput(inputId = "playerchoose3", label = "Forward 1",
-               #                       c(sort(unique(as.character(forward_1)))),
-               #                       selected = "Herbert Jones")),
-               # column(2.4, align = "center",
-               #        selectizeInput(inputId = "playerchoose4", label = "Forward 2",
-               #                       c(sort(unique(as.character(forward_2)))),
-               #                       selected = "Chet Holmgren")),
-               # column(2.4, align = "center",
-               #        selectizeInput(inputId = "playerchoose5", label = "Center",
-               #                       c(sort(unique(as.character(center)))),
-               #                       selected = "Rudy Gobert"))),
-               # 
-               # column(2.4, align = "center",
-               #               plotOutput("guard_1_details",height = 100)),
-               # column(2.4, align = "center",
-               #        plotOutput("guard_2_details",height = 100)),
-               # column(2.4, align = "center",
-               #        plotOutput("forward_1_details",height = 100)),
-               # column(2.4, align = "center",
-               #        plotOutput("forward_2_details",height = 100)),
-               # column(2.4, align = "center",
-               #        plotOutput("center_details",height = 100)),
-               #   column(12, align = "center",
-               #          plotOutput("kpi_chart",height = 250)),
-               # )),
-               # column(4, align = "center",
-               #        plotOutput("pitcher_head_shot",height = 100)),
-               # column(8, align = "center",
-               #        tableOutput("situation")),
-               # column(12, align = "center",
-               #          tableOutput("pitch_frequency")),
-               # column(7, align = "center",
-               #        tableOutput("top_five")),
-               # column(5, align = "center",
-               #        plotOutput("loc_chart",height = 250)),
-               # )),
-               tabPanel("About",
+  
+               tabPanel("About the Model",
                         fluidRow(
                           column(12, align = "center",
+                                 tags$h5("Created by Ryan Miele"),
+                                 br(),
+                                 br(),
                                  tags$h5("If anyone spots any issues, has any questions, or has any suggestions, 
                                                        don't hesitate to reach out to me @BuckAnalytics or ryancmiele@gmail.com."),
                                  br(),
-                                 tags$h5("All of the data is from Baseball Savant via the baseballr package"))
+                                 br(),
+                                 br(),
+                                 br(),
+                                 br(),
+                                 tags$h5("Using the hoopR abnd NBAr packages, I took the defensive rating of 
+                                         every lineup in the last 5 seasons that played at least 70 minutes together.
+                                         I used individual DLEBRON data from bball-index.com."),
+                                 br(),
+                                 br(),
+                                 tags$h5("I built a simple linear regression model to predict the defensive rating 
+                                 based on several qualities of the players in the lineup. Here they are ranked in 
+                                         terms of importance."),
+                                 br(),
+                                 br(),
+                                 plotOutput("VIP",height = 250,width = 500),
+                                 br(),
+                                 br(),
+                                 tags$h5("Some of these inputs need an explanation. Since guards and forwards are 
+                                         mostly interchangeable in today's NBA, I grouped those positions together 
+                                         and separated by height. Guard 1 is the smaller guard and forward 1 is the 
+                                         smaller forward."),
+                                 br(),
+                                 br(),
+                                 tags$h5("Both forwards have the largest impact on the lineup's defensive rating, followed
+                                         by center. The bigger guard has the smallest effect."),
+                                 br(),
+                                 br(),
+                                 tags$h5("The R-squared value is 0.246. Although this is relatively small, it's 
+                                         difficult to predict total defensive output for a lineup. This is not meant to 
+                                         be 'the end all be all' so just be cautious!"))
                           
                         )))))
 
@@ -1652,8 +1583,8 @@ server <-  function(input, output) {
     
     
     G1_kpi <- ggplot(Guard1,aes(x = 3, y = Guard1_DLEBRON)) +
-      geom_linerange(aes(ymin = 0, ymax = 1), linewidth = 4, color = "lightblue1") +
-      geom_linerange(aes(ymin = 0, ymax = Guard1_DLEBRON), linewidth = 4, color = "steelblue2") +
+      geom_linerange(aes(ymin = 0, ymax = 1), linewidth = 2, color = "lightblue1") +
+      geom_linerange(aes(ymin = 0, ymax = Guard1_DLEBRON), linewidth = 2, color = "steelblue2") +
       geom_text(aes(x = .5, y = 0, label = scales::percent(Guard1_DLEBRON)), size =7 ) +
       coord_polar(theta = 'y') +
       theme_void() +
@@ -1703,8 +1634,8 @@ server <-  function(input, output) {
     
     
     G2_kpi <- ggplot(Guard2,aes(x = 3, y = Guard2_DLEBRON)) +
-      geom_linerange(aes(ymin = 0, ymax = 1), linewidth = 4, color = "lightblue1") +
-      geom_linerange(aes(ymin = 0, ymax = Guard2_DLEBRON), linewidth = 4, color = "steelblue2") +
+      geom_linerange(aes(ymin = 0, ymax = 1), linewidth = 2, color = "lightblue1") +
+      geom_linerange(aes(ymin = 0, ymax = Guard2_DLEBRON), linewidth = 2, color = "steelblue2") +
       geom_text(aes(x = .5, y = 0, label = scales::percent(Guard2_DLEBRON)), size =7 ) +
       coord_polar(theta = 'y') +
       theme_void() +
@@ -1760,8 +1691,8 @@ server <-  function(input, output) {
     
    
    F1_kpi <- ggplot(Forward1,aes(x = 3, y = Forward1_DLEBRON)) +
-     geom_linerange(aes(ymin = 0, ymax = 1), linewidth = 4, color = "lightblue1") +
-     geom_linerange(aes(ymin = 0, ymax = Forward1_DLEBRON), linewidth = 4, color = "steelblue2") +
+     geom_linerange(aes(ymin = 0, ymax = 1), linewidth = 2, color = "lightblue1") +
+     geom_linerange(aes(ymin = 0, ymax = Forward1_DLEBRON), linewidth = 2, color = "steelblue2") +
      geom_text(aes(x = .5, y = 0, label = scales::percent(Forward1_DLEBRON)), size =7 ) +
      coord_polar(theta = 'y') +
      theme_void() +
@@ -1812,8 +1743,8 @@ server <-  function(input, output) {
     
     
     F2_kpi <- ggplot(Forward2,aes(x = 3, y = Forward2_DLEBRON)) +
-      geom_linerange(aes(ymin = 0, ymax = 1), linewidth = 4, color = "lightblue1") +
-      geom_linerange(aes(ymin = 0, ymax = Forward2_DLEBRON), linewidth = 4, color = "steelblue2") +
+      geom_linerange(aes(ymin = 0, ymax = 1), linewidth = 2, color = "lightblue1") +
+      geom_linerange(aes(ymin = 0, ymax = Forward2_DLEBRON), linewidth = 2, color = "steelblue2") +
       geom_text(aes(x = .5, y = 0, label = scales::percent(Forward2_DLEBRON)), size =7 ) +
       coord_polar(theta = 'y') +
       theme_void() +
@@ -1865,8 +1796,8 @@ server <-  function(input, output) {
     
     
     C_kpi <- ggplot(Center1,aes(x = 3, y = Center1_DLEBRON)) +
-      geom_linerange(aes(ymin = 0, ymax = 1), linewidth = 4, color = "lightblue1") +
-      geom_linerange(aes(ymin = 0, ymax = Center1_DLEBRON), linewidth = 4, color = "steelblue2") +
+      geom_linerange(aes(ymin = 0, ymax = 1), linewidth = 2, color = "lightblue1") +
+      geom_linerange(aes(ymin = 0, ymax = Center1_DLEBRON), linewidth = 2, color = "steelblue2") +
       geom_text(aes(x = .5, y = 0, label = scales::percent(Center1_DLEBRON)), size =7 ) +
       coord_polar(theta = 'y') +
       theme_void() +
@@ -1955,35 +1886,20 @@ server <-  function(input, output) {
     Def_Rating_projs2 <- cbind(user_input_df, Def_Rating_preds)
     
     
-    min_current <- .17
-    max_current <- .77
-    min_new <- 1
-    max_new <- 0
-    
-    # Apply the linear transformation
-    Def_Rating_projs2$adjusted_predictions <- max_new - ( Def_Rating_projs2$Def_Rating - min_current) * (max_new - min_new) / (max_current - min_current)
-    
-    
-    Def_Rating_projs2 <- Def_Rating_projs2%>%
-      mutate(adjusted_predictions = case_when(adjusted_predictions >1 ~ 1,
-                                              adjusted_predictions <0 ~ 0,
-                                              TRUE ~ adjusted_predictions))
-    
-    
-    
+
     
     
     
     ggplot(Def_Rating_projs2,aes(x = 3, y = adjusted_predictions)) +
-      geom_linerange(aes(ymin = 0, ymax = 1), linewidth = 10, color = "snow2") +
-      geom_linerange(aes(ymin = 0, ymax = adjusted_predictions), linewidth = 10, color = "firebrick1") +
+      geom_linerange(aes(ymin = 0, ymax = 1), linewidth = 9, color = "snow2") +
+      geom_linerange(aes(ymin = 0, ymax = adjusted_predictions), linewidth = 9, color = "firebrick1") +
       geom_text(aes(x = .5, y = 0, label = scales::percent(adjusted_predictions)), size =17 ) +
       coord_polar(theta = 'y') +
       theme_void() +
       labs(caption =  "Lineup Defensive Rating Percentile")+
       scale_x_continuous(limits = c(0, 4), expand = c(0, 0)) + 
       theme(strip.text = element_blank(),
-            plot.caption = element_text(hjust = .5,vjust = 16,size=13))
+            plot.caption = element_text(hjust = .5,vjust = 66,size=17))
     
     
     
@@ -1994,8 +1910,19 @@ server <-  function(input, output) {
   
   
   
+  output$VIP <- renderPlot({
+    
+    
+    vip(lm, num_features = 19) + theme_minimal()
+    
+    
+    
+  })
+  
+  
   
   
 }
 
 shinyApp(ui = ui, server = server)
+
