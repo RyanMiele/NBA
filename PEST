@@ -1,0 +1,340 @@
+
+     
+     ### PEST
+     
+     
+     library(NBAr)
+     
+     hustle <- nba_leaguehustlestatsplayer(season = year_to_season(2024),
+                                           season_type = "Regular Season")
+     
+     
+     
+     hustle <- as.data.frame(hustle)
+     
+     hustle <- hustle %>%
+       rename_with(~str_remove(., 'HustleStatsPlayer.'))%>%
+       reframe(PLAYER_NAME,PLAYER_ID,TEAM_ABBREVIATION,G,MIN,DEFLECTIONS,CHARGES_DRAWN)
+     
+     
+     bio <- nba_leaguedashplayerbiostats(season = year_to_season(2024),
+                                         season_type = "Regular Season")
+     
+     bio <- as.data.frame(bio)
+     
+     bio <- bio %>%
+       rename_with(~str_remove(., 'LeagueDashPlayerBioStats.'))%>%
+       reframe(PLAYER_ID,AGE,PLAYER_HEIGHT,PLAYER_HEIGHT_INCHES,PLAYER_WEIGHT)
+     
+     
+     
+     
+     def_totals <- get_tracking(season = 2024, 'Player', per_mode = "Totals",
+                                measure_type = c('Defense',"SpeedDistance")[1],
+                                season_type = "Regular+Season")
+     
+     def_totals$player_id <- as.character(def_totals$player_id)
+     
+     def_totals <- def_totals%>%
+       reframe(player_id,stl,blk,def_rim_fg_pct)
+     
+     
+     
+     speed_dist <- get_tracking(season = 2024, 'Player', per_mode = "Totals",
+                                measure_type = c('Defense',"SpeedDistance")[2],
+                                season_type = "Regular+Season")
+     
+     speed_dist$player_id <- as.character(speed_dist$player_id)
+     
+     speed_dist <- speed_dist%>%
+       reframe(player_id,dist_miles_def,avg_speed_def)
+     
+    
+     
+     defense <- get_defense(season = 2024, 'Player', 'Overall',per_mode = "Totals")
+     
+     
+     defense$close_def_person_id <- as.character(defense$close_def_person_id)
+     
+     defense <- defense%>%
+       reframe(close_def_person_id,d_fga,pct_plusminus)
+     
+     
+     
+     
+     
+     
+     
+     
+   
+   new_df <- left_join(bio, hustle, by = "PLAYER_ID")
+   
+   
+   
+   new_df <- left_join(new_df, speed_dist, by = c("PLAYER_ID" = "player_id"))
+   
+   
+   new_df <- left_join(new_df, def_totals, by = c("PLAYER_ID" = "player_id"))
+   
+   
+   new_df <- left_join(new_df, defense, by = c("PLAYER_ID" = "close_def_person_id"))
+   
+   
+   per_min <- new_df%>%
+     mutate_at(c('AGE', 'PLAYER_HEIGHT_INCHES','PLAYER_WEIGHT','G',
+                 'MIN','DEFLECTIONS','CHARGES_DRAWN'), as.numeric)%>%
+     mutate(stl_per_min = stl/MIN,
+            blk_per_min = blk/MIN,
+            dfga_per_min = d_fga/MIN,
+            dist_miles_per_min = dist_miles_def/MIN,
+            deflections_per_min = DEFLECTIONS/MIN,
+            charges_per_min = CHARGES_DRAWN/MIN)
+   
+   
+   
+   standardized <- per_min %>% 
+     filter(MIN > 40)%>%
+     mutate_at(c("stl_per_min","blk_per_min",                                                
+                 "dfga_per_min",  "dist_miles_per_min", "deflections_per_min",          
+                 "charges_per_min","avg_speed_def"), ~(scale(.)))%>%
+     mutate(blk_per_min = blk_per_min*1.3,
+            stl_per_min = stl_per_min*1.9,
+            charges_per_min = charges_per_min*1.2,
+            avg_speed_def = avg_speed_def *1.8,
+            deflections_per_min = deflections_per_min *1.3,
+            dist_miles_per_min = dist_miles_per_min*1.5,
+            dfga_per_min = dfga_per_min*.65,
+            Pest = stl_per_min + blk_per_min -                                                
+              dfga_per_min +  dist_miles_per_min + deflections_per_min  + charges_per_min +             
+              avg_speed_def)
+   
+   
+   
+   
+   Pest <- standardized%>%
+     #filter(MIN > 900)%>%
+     arrange(desc(Pest))%>%
+     mutate(Pest_percent_rank = (rank(Pest)/length(Pest))*100,
+            blk_per_min_percent_rank = (rank(blk_per_min)/length(blk_per_min))*100,
+            stl_per_min_percent_rank = (rank(stl_per_min)/length(stl_per_min))*100,
+            charges_per_min_percent_rank = (rank(charges_per_min)/length(charges_per_min))*100,
+            avg_speed_def_percent_rank = (rank(avg_speed_def)/length(avg_speed_def))*100,
+            deflections_per_min_percent_rank = (rank(deflections_per_min)/length(deflections_per_min))*100,
+            dist_miles_per_min_percent_rank = (rank(dist_miles_per_min)/length(dist_miles_per_min))*100,
+            dfga_per_min_percent_rank = (rank(-dfga_per_min)/length(dfga_per_min))*100)
+   
+   
+   
+   
+   
+   
+   logos <- hoopR::load_nba_player_box(2025)%>%
+     reframe(athlete_display_name,athlete_position_abbreviation,athlete_headshot_href,team_logo)
+   
+   
+   logos <- logos[!duplicated(logos$athlete_display_name), ]
+   
+   
+   Pest <- left_join(Pest,logos, by = c("PLAYER_NAME" = "athlete_display_name"))
+   
+   
+   
+ ## Individual Rankings
+   
+   Pest_table <- Pest%>%
+     mutate(position_group = case_when(
+       athlete_position_abbreviation == "PG" | athlete_position_abbreviation == "SG" 
+       | athlete_position_abbreviation == "G"~ "G",
+       athlete_position_abbreviation == "SF" | athlete_position_abbreviation == "PF" 
+       | athlete_position_abbreviation == "F"~ "F",
+       athlete_position_abbreviation == "C" ~ "C"),
+       Rank = row_number())%>%
+        #reframe(Rank,position_group,PLAYER_NAME,athlete_headshot_href,AGE, PLAYER_HEIGHT,MIN,Pest)%>%
+     reframe(Rank,position_group,PLAYER_NAME,TEAM_ABBREVIATION,athlete_headshot_href,MIN, avg_speed_def_percent_rank,dist_miles_per_min_percent_rank,
+             stl_per_min_percent_rank, blk_per_min_percent_rank, charges_per_min_percent_rank,deflections_per_min_percent_rank,
+             dfga_per_min_percent_rank ,Pest)%>%
+     #filter(TEAM_ABBREVIATION == "SAS")
+         filter(Rank <=10 )
+   
+   
+   
+   
+   gt(Pest_table)%>%
+     gt_theme_538()%>%
+     gtExtras::gt_img_rows(athlete_headshot_href)%>%
+     cols_label(PLAYER_NAME = "Player",
+                position_group = "Pos",
+                athlete_headshot_href = "",
+                PLAYER_HEIGHT = "Height",
+                AGE = "Age",
+                MIN = "Mins",
+                Pest = "PEST")%>%
+     data_color(columns = Pest ,
+                target_columns = Pest ,
+                palette = c("red", "indianred1","white", "steelblue1","blue"),
+                domain = c(-20,20))%>%
+     #fmt_percent(columns = c(fg3_pct),decimals = 1)%>%
+     fmt_number(columns = c(Pest),decimals = 1)%>%
+     gt_add_divider(PLAYER_HEIGHT, color = 'black', include_labels = FALSE) %>%
+     gt::cols_align(columns = c(everything()),"center")%>%
+     tab_header(title = "Player PEST Rankings",subtitle = "2024-25 Season | Minimum 20 Minutes")%>%
+     tab_source_note(source_note = "By Bucknell Analytics | Data: NBAr")%>%
+     opt_align_table_header("center")%>%
+     tab_footnote(locations = cells_column_labels(columns = Pest),
+                  footnote = "PEST Measures Perimeter Defensive Aggressiveness Using Weighted Box Score Stats and Tracking Data")
+   
+     
+   
+   gt(Pest_table)%>%
+     gt_theme_538()%>%
+     gtExtras::gt_img_rows(athlete_headshot_href)%>%
+     cols_label(PLAYER_NAME = "Player",
+                position_group = "Pos",
+                athlete_headshot_href = "",
+                avg_speed_def_percent_rank = "Avg Speed",
+                dist_miles_per_min_percent_rank = "Distance Run",
+                stl_per_min_percent_rank = "Steals",
+                blk_per_min_percent_rank = "Blocks",
+                charges_per_min_percent_rank = "Charges",
+                deflections_per_min_percent_rank = "Deflections",
+                dfga_per_min_percent_rank = "Shots Allowed",
+                Pest = "PEST")%>%
+     data_color(columns = Pest ,
+                target_columns = Pest ,
+                palette = c("red", "indianred1","white", "steelblue1","blue"),
+                domain = c(-20,20))%>%
+     data_color(columns = avg_speed_def_percent_rank ,
+                target_columns = avg_speed_def_percent_rank ,
+                palette = c("red", "indianred1","white", "steelblue1","blue"),
+                domain = c(0,100))%>%
+     data_color(columns = dist_miles_per_min_percent_rank ,
+                target_columns = dist_miles_per_min_percent_rank ,
+                palette = c("red", "indianred1","white", "steelblue1","blue"),
+                domain = c(0,100))%>%
+     data_color(columns = stl_per_min_percent_rank ,
+                target_columns = stl_per_min_percent_rank ,
+                palette = c("red", "indianred1","white", "steelblue1","blue"),
+                domain = c(0,100))%>%
+     data_color(columns = blk_per_min_percent_rank ,
+                target_columns = blk_per_min_percent_rank ,
+                palette = c("red", "indianred1","white", "steelblue1","blue"),
+                domain = c(0,100))%>%
+     data_color(columns =  charges_per_min_percent_rank ,
+                target_columns =  charges_per_min_percent_rank ,
+                palette = c("red", "indianred1","white", "steelblue1","blue"),
+                domain = c(0,100))%>%
+     data_color(columns = deflections_per_min_percent_rank ,
+                target_columns = deflections_per_min_percent_rank ,
+                palette = c("red", "indianred1","white", "steelblue1","blue"),
+                domain = c(0,100))%>%
+     data_color(columns = dfga_per_min_percent_rank ,
+                target_columns = dfga_per_min_percent_rank ,
+                palette = c("red", "indianred1","white", "steelblue1","blue"),
+                domain = c(100,0))%>%
+     #fmt_percent(columns = c(fg3_pct),decimals = 1)%>%
+     fmt_number(columns = c(Pest),decimals = 1)%>%
+     fmt_number(columns = c(avg_speed_def_percent_rank,dist_miles_per_min_percent_rank,
+                            stl_per_min_percent_rank, blk_per_min_percent_rank, charges_per_min_percent_rank,deflections_per_min_percent_rank,
+                            dfga_per_min_percent_rank),decimals = 0)%>%
+     gt_add_divider(athlete_headshot_href, color = 'black', include_labels = FALSE) %>%
+     gt_add_divider(dfga_per_min_percent_rank, color = 'black', include_labels = TRUE) %>%
+     gt::cols_align(columns = c(everything()),"center")%>%
+     tab_header(title = "Player PEST Rankings",subtitle = "2024-25 Season | Minimum 20 Minutes")%>%
+     tab_source_note(source_note = "By Bucknell Analytics | Data: NBAr")%>%
+     opt_align_table_header("center")%>%
+     tab_footnote(locations = cells_column_labels(columns = Pest),
+                  footnote = "PEST Measures Perimeter Defensive Aggressiveness Using Weighted Box Score Stats and Tracking Data")
+   
+   
+   
+   ## PEST Team
+   
+   
+   
+   logos <- hoopR::load_nba_player_box(2025)%>%
+     reframe(athlete_display_name,team_abbreviation,athlete_position_abbreviation,athlete_headshot_href,team_logo)
+   
+   
+   logos <- logos[!duplicated(logos$team_abbreviation), ]
+   
+   team_logos <- logos%>%
+     mutate(team_abbreviation = case_when(team_abbreviation == "NO" ~ "NOP",
+                                          team_abbreviation == "GS" ~ "GSW",
+                                          team_abbreviation == "SA" ~ "SAS",
+                                          team_abbreviation == "NY" ~ "NYK",
+                                          team_abbreviation == "UTAH" ~ "UTA",
+                                          team_abbreviation == "WSH" ~ "WAS",
+                                          TRUE ~ team_abbreviation))
+   
+   
+   
+   Pest <- left_join(Pest,team_logos, by = c("TEAM_ABBREVIATION" = "team_abbreviation"))
+   
+   
+   
+   Pest$Pest[is.na(Pest$Pest)] <- 0
+   
+   Pest_team_table <- Pest%>%
+     group_by(TEAM_ABBREVIATION)%>%
+     mutate(weighted_pest = weighted.mean(Pest,MIN))%>%
+     arrange(desc(weighted_pest))%>%
+     ungroup()%>%
+     distinct(team_logo,.keep_all = TRUE)%>%
+       mutate(Rank = row_number())%>%
+     reframe(Rank,TEAM_ABBREVIATION,team_logo,weighted_pest)
+    
+   
+   
+   
+   
+   
+   
+   tab1 <- Pest_team_table %>%
+     dplyr::slice(1:15) 
+   
+   
+   tab2 <- Pest_team_table %>%
+     dplyr::slice(16:30) 
+   
+   
+   tab_combined <- data.frame(tab1,tab2)
+   
+   
+   
+   
+   tab_combined%>%
+     gt()%>%
+     gt_theme_538()%>%
+     gtExtras::gt_img_rows(team_logo)%>%
+     gtExtras::gt_img_rows(team_logo.1)%>%
+     data_color(columns = c(weighted_pest,weighted_pest.1),
+                target_columns = c(weighted_pest,weighted_pest.1),
+                palette = c("red", "indianred1","white", "steelblue1","blue"),
+                domain = c(-4.5,4.5))%>%
+     cols_label(team_logo = " ",
+                TEAM_ABBREVIATION = "Team",
+                weighted_pest = "PEST",
+                Rank.1 = "Rank",
+                team_logo.1 = " ",
+                TEAM_ABBREVIATION.1 = "Team",
+                weighted_pest.1 = "PEST")%>%
+     fmt_number(columns = c(weighted_pest,weighted_pest.1),decimals = 2)%>%
+     gt_add_divider(weighted_pest, color = 'black', include_labels = TRUE) %>%
+     # gt_add_divider(Rank, color = 'black', include_labels = FALSE) %>%
+     # gt_add_divider(Rank.1, color = 'black', include_labels = FALSE) %>%
+     gt::cols_align(columns = c(everything()),"center")%>%
+     tab_header(title = "Team PEST Rankings",subtitle = "2024-25 Season | Weighted By Playing Time")%>%
+     tab_source_note(source_note = "By Bucknell Analytics | Data: hoopR & NBAr")%>%
+     opt_align_table_header("center")%>%
+     tab_footnote(locations = cells_column_labels(columns = c(weighted_pest,weighted_pest.1)),
+                  footnote = "PEST Measures Perimeter Defensive Aggressiveness Using Weighted Box Score Stats and Tracking Data")
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
