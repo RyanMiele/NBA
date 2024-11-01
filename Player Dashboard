@@ -1,0 +1,1181 @@
+
+ 
+ #### NBA PLAYER CARDS 
+ 
+ 
+ 
+ tracking <-  get_tracking(season = 2023, 'Player', measure_type = "Efficiency")
+ 
+ tracking <-  get_tracking(season = 2023, 'Player', measure_type = "Drives")
+ 
+ tracking <-  get_tracking(season = 2023, 'Player', measure_type = "Possessions")
+ 
+ 
+ 
+ nba_box <- espn_nba_player_stats(4433134, year = 2023, season_type = "regular", total = FALSE)
+ names(nba_box)
+ 
+ log <- nba_leaguegamelog(league_id = '00', player_or_team = "P",season = year_to_season(most_recent_nba_season() - 1))
+ log <- as.data.frame(log)
+ 
+ 
+ help("get_shooting")
+ help("nba_shotchartdetail")
+ #Can Break up FGA by zone
+ 
+ 
+ library(nbastatR)
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ ### Synergy Play Types
+ 
+ 
+ synergy_iso <- nba_synergyplaytypes(
+   per_mode = "Totals",
+   play_type = 'Isolation',
+   player_or_team = "P",
+   season = 2023,
+   season_type = "Regular Season",
+   type_grouping = "Offensive"
+ )
+ 
+ 
+ synergy_iso <- as.data.frame(synergy_iso)
+ 
+ synergy_iso <- synergy_iso %>%
+   rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+   mutate_at(c("PLAYER_ID","POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+   reframe(PLAYER_ID,PLAYER_NAME,PLAY_TYPE,POSS_PCT,PPP, PERCENTILE)
+ 
+
+ 
+ synergy_Transition <- nba_synergyplaytypes(
+   per_mode = "Totals",
+   play_type = 'Transition',
+   player_or_team = "P",
+   season = 2023,
+   season_type = "Regular Season",
+   type_grouping = "Offensive"
+ )
+ 
+ 
+ synergy_Transition <- as.data.frame(synergy_Transition)
+ 
+ synergy_Transition <- synergy_Transition %>%
+   rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+   mutate_at(c("PLAYER_ID","POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+   reframe(PLAYER_ID,PLAYER_NAME,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+ 
+ 
+ 
+ 
+ synergy_PRBallHandler <- nba_synergyplaytypes(
+   per_mode = "Totals",
+   play_type = 'PRBallHandler',
+   player_or_team = "P",
+   season = 2023,
+   season_type = "Regular Season",
+   type_grouping = "Offensive"
+ )
+ 
+ 
+ synergy_PRBallHandler <- as.data.frame(synergy_PRBallHandler)
+ 
+ synergy_PRBallHandler <- synergy_PRBallHandler %>%
+   rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+   mutate_at(c("PLAYER_ID","POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+   reframe(PLAYER_ID,PLAYER_NAME,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+ 
+ 
+ 
+ 
+ synergy_PRRollman <- nba_synergyplaytypes(
+   per_mode = "Totals",
+   play_type = 'PRRollman',
+   player_or_team = "P",
+   season = 2023,
+   season_type = "Regular Season",
+   type_grouping = "Offensive"
+ )
+ 
+ 
+ synergy_PRRollman <- as.data.frame(synergy_PRRollman)
+ 
+ synergy_PRRollman <- synergy_PRRollman %>%
+   rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+   mutate_at(c("PLAYER_ID","POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+   reframe(PLAYER_ID,PLAYER_NAME,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+ 
+ 
+ 
+ 
+ synergy_Postup <- nba_synergyplaytypes(
+   per_mode = "Totals",
+   play_type = 'Postup',
+   player_or_team = "P",
+   season = 2023,
+   season_type = "Regular Season",
+   type_grouping = "Offensive"
+ )
+ 
+ 
+ synergy_Postup <- as.data.frame(synergy_Postup)
+ 
+ synergy_Postup <- synergy_Postup %>%
+   rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+   mutate_at(c("PLAYER_ID","POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+   reframe(PLAYER_ID,PLAYER_NAME,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+ 
+ 
+ 
+ 
+ synergy_Spotup <- nba_synergyplaytypes(
+   per_mode = "Totals",
+   play_type = 'Spotup',
+   player_or_team = "P",
+   season = 2023,
+   season_type = "Regular Season",
+   type_grouping = "Offensive"
+ )
+ 
+ 
+ synergy_Spotup <- as.data.frame(synergy_Spotup)
+ 
+ synergy_Spotup <- synergy_Spotup %>%
+   rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+   mutate_at(c("PLAYER_ID","POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+   reframe(PLAYER_ID,PLAYER_NAME,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+ 
+ 
+ 
+ 
+ synergy_Handoff <- nba_synergyplaytypes(
+   per_mode = "Totals",
+   play_type = 'Handoff',
+   player_or_team = "P",
+   season = 2023,
+   season_type = "Regular Season",
+   type_grouping = "Offensive"
+ )
+ 
+ 
+ synergy_Handoff <- as.data.frame(synergy_Handoff)
+ 
+ synergy_Handoff <- synergy_Handoff %>%
+   rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+   mutate_at(c("PLAYER_ID","POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+   reframe(PLAYER_ID,PLAYER_NAME,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+ 
+ 
+ 
+ 
+ synergy_Cut <- nba_synergyplaytypes(
+   per_mode = "Totals",
+   play_type = 'Cut',
+   player_or_team = "P",
+   season = 2023,
+   season_type = "Regular Season",
+   type_grouping = "Offensive"
+ )
+ 
+ 
+ synergy_Cut <- as.data.frame(synergy_Cut)
+ 
+ synergy_Cut <- synergy_Cut%>%
+   rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+   mutate_at(c("PLAYER_ID","POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+   reframe(PLAYER_ID,PLAYER_NAME,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+ 
+ 
+ 
+ synergy_OffScreen <- nba_synergyplaytypes(
+   per_mode = "Totals",
+   play_type = 'OffScreen',
+   player_or_team = "P",
+   season = 2023,
+   season_type = "Regular Season",
+   type_grouping = "Offensive"
+ )
+ 
+ 
+ synergy_OffScreen <- as.data.frame(synergy_OffScreen)
+ 
+ synergy_OffScreen <- synergy_OffScreen %>%
+   rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+   mutate_at(c("PLAYER_ID","POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+   reframe(PLAYER_ID,PLAYER_NAME,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+ 
+ 
+ 
+ synergy_total <- rbind(synergy_iso,synergy_OffScreen,synergy_Handoff,synergy_Postup,
+                        synergy_PRRollman,synergy_PRBallHandler,synergy_Cut,synergy_Spotup,
+                        synergy_Transition)
+ 
+ 
+ synergy_chart <- synergy_total%>%
+   group_by(PLAY_TYPE)%>%
+   mutate(percentile_freq = rank(POSS_PCT)/length(POSS_PCT),
+          percentile_freq = percentile_freq * 100,
+          PERCENTILE = PERCENTILE * 100)%>%
+   filter(PLAYER_NAME == "Jalen Brunson")%>%
+   reframe(PLAY_TYPE,POSS_PCT,percentile_freq,PPP,PERCENTILE)%>%
+   arrange(desc(percentile_freq))
+ 
+ 
+ 
+ synergy_table <- 
+   
+   gt(synergy_chart)%>%
+   gt_theme_538()%>%
+   #cols_hide(c(percentile_freq,PERCENTILE)) %>% 
+   cols_label(PLAY_TYPE = "Action",
+              POSS_PCT = "Poss %",
+              percentile_freq = "PCTL",
+              PPP = "PPP",
+              PERCENTILE = "PCTL")%>%
+   data_color(columns = percentile_freq,
+              target_columns = percentile_freq,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   data_color(columns = PERCENTILE,
+              target_columns = PERCENTILE,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   fmt_percent(columns = c(POSS_PCT),decimals = 1)%>%
+   fmt_number(columns = c(PPP),decimals = 2)%>%
+   fmt_number(columns = c(percentile_freq,PERCENTILE),decimals = 0)%>%
+   gt_add_divider(PLAY_TYPE, color = 'black', include_labels = FALSE) %>%
+   gt::cols_align(columns = c(everything()),"center")%>%
+   tab_spanner(columns = c(POSS_PCT,percentile_freq),label = "Frequency")%>%
+   tab_spanner(columns = c(PPP,PERCENTILE),label = "Efficiency")
+ 
+ 
+ syn<- tempfile(fileext = ".png")
+ gtsave(synergy_table,syn)
+ synergy_table_png <- png::readPNG(syn,native = TRUE)
+ 
+ 
+ 
+ 
+ ### Shot Charts
+ 
+ 
+ 
+ individual_shot_detail <- nba_shotchartdetail(league_id = '00', player_id = '1628973', 
+                                               season = "2023-24")
+ 
+ player_shot_detail <- as.data.frame(individual_shot_detail[[1]])
+ 
+ league_shot_detail <- as.data.frame(individual_shot_detail[[2]])
+ 
+ unique(player_shot_detail$SHOT_TYPE)
+ 
+ str(player_shot_detail)
+ 
+ shot_chart_freq_data <- league_shot_detail%>%
+   mutate_at(c("FGM","FGA"), as.numeric)%>%
+   mutate(final_zone = case_when(
+     SHOT_ZONE_BASIC == "Above the Break 3" & SHOT_ZONE_AREA == "Left Side Center(LC)" ~ "Left Side Above the Break 3",
+     SHOT_ZONE_BASIC == "Above the Break 3" & SHOT_ZONE_AREA == "Right Side Center(RC)" ~ "Right Side Above the Break 3",
+     SHOT_ZONE_BASIC == "Above the Break 3" & SHOT_ZONE_AREA == "Center(C)" ~ "Center Above the Break 3",
+     SHOT_ZONE_BASIC == "Right Corner 3" ~ "Right Corner 3",
+     SHOT_ZONE_BASIC == "Left Corner 3" ~ "Left Corner 3",
+     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Left Side(L)" ~ "Left Side Mid-Range",
+     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Left Side Center(LC)" ~ "Left Side Center Mid-Range",
+     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Center(C)" ~ "Center Mid-Range",
+     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Right Side Center(RC)" ~ "Right Side Center Mid-Range",
+     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Right Side(R)" ~ "Right Side Mid-Range",
+     SHOT_ZONE_BASIC == "Restricted Area" |  (SHOT_ZONE_BASIC == "In The Paint (Non-RA)" & SHOT_ZONE_RANGE == "Less Than 8 ft.") ~ "Rim",
+     SHOT_ZONE_BASIC == "In The Paint (Non-RA)" & SHOT_ZONE_RANGE != "Less Than 8 ft." ~ "Paint",
+     TRUE ~ league_shot_detail$SHOT_ZONE_BASIC),
+     potential_points = if_else(SHOT_ZONE_RANGE == "24+ ft.", 3,2),
+     points = potential_points * FGM,
+     total_overall_shots = sum(FGA))%>%
+   group_by(final_zone)%>%
+   mutate(points = sum(points),
+          league_frequency = sum(FGA)/total_overall_shots,
+          league_pps = points/sum(FGA))%>%
+   filter(final_zone != "Above the Break 3" & final_zone != "Backcourt")%>%
+   reframe(final_zone, league_frequency, league_pps)%>%
+   distinct(final_zone,.keep_all = TRUE)
+ 
+ 
+ 
+ player_shot_chart_freq_data <- player_shot_detail%>%
+   mutate(final_zone = case_when(
+     SHOT_ZONE_BASIC == "Above the Break 3" & SHOT_ZONE_AREA == "Left Side Center(LC)" ~ "Left Side Above the Break 3",
+     SHOT_ZONE_BASIC == "Above the Break 3" & SHOT_ZONE_AREA == "Right Side Center(RC)" ~ "Right Side Above the Break 3",
+     SHOT_ZONE_BASIC == "Above the Break 3" & SHOT_ZONE_AREA == "Center(C)" ~ "Center Above the Break 3",
+     SHOT_ZONE_BASIC == "Right Corner 3" ~ "Right Corner 3",
+     SHOT_ZONE_BASIC == "Left Corner 3" ~ "Left Corner 3",
+     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Left Side(L)" ~ "Left Side Mid-Range",
+     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Left Side Center(LC)" ~ "Left Side Center Mid-Range",
+     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Center(C)" ~ "Center Mid-Range",
+     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Right Side Center(RC)" ~ "Right Side Center Mid-Range",
+     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Right Side(R)" ~ "Right Side Mid-Range",
+     SHOT_ZONE_BASIC == "Restricted Area" |  (SHOT_ZONE_BASIC == "In The Paint (Non-RA)" & SHOT_ZONE_RANGE == "Less Than 8 ft.") ~ "Rim",
+     SHOT_ZONE_BASIC == "In The Paint (Non-RA)" & SHOT_ZONE_RANGE != "Less Than 8 ft." ~ "Paint",
+     TRUE ~ player_shot_detail$SHOT_ZONE_BASIC),
+        points = case_when(
+          SHOT_TYPE == "2PT Field Goal" & SHOT_MADE_FLAG == "1" ~ 2,
+          SHOT_TYPE == "3PT Field Goal" & SHOT_MADE_FLAG == "1" ~ 3,
+          TRUE ~ 0),
+        total_overall_shots = n())%>%
+   group_by(final_zone)%>%
+   mutate(frequency = n()/total_overall_shots,
+          pps = round(sum(points)/n(),2))%>%
+   reframe(final_zone, frequency, pps)%>%
+   distinct(final_zone,.keep_all = TRUE)
+ 
+ 
+ shot_chart_x_y <- tibble(
+   final_zone = c("Left Corner 3", "Left Side Above the Break 3", "Center Above the Break 3", "Right Side Above the Break 3", "Right Corner 3",
+                  "Left Side Mid-Range", "Left Side Center Mid-Range", "Center Mid-Range", "Right Side Center Mid-Range", "Right Side Mid-Range",
+                  "Paint", "Rim"),
+   x = c("25", "18", "0","-18","-25",
+         "12", "11", "0","-11","-12",
+         "0","0"),
+   y = c("-42", "-22","-15","-22","-42",
+         "-40", "-30","-25","-30","-40",
+         "-34", "-43"))
+ 
+ 
+ 
+ joined_shot_chart <- left_join(player_shot_chart_freq_data,shot_chart_freq_data, by = c("final_zone"))
+ 
+ joined_shot_chart <- left_join(joined_shot_chart,shot_chart_x_y, by = c("final_zone"))
+ 
+ total_shot_chart <- joined_shot_chart%>%
+   mutate(freq_over_avg = frequency - league_frequency,
+          pps_over_avg = pps - league_pps)
+ 
+ 
+ total_shot_chart$x <- as.numeric(total_shot_chart$x)
+ total_shot_chart$y <- as.numeric(total_shot_chart$y)
+ 
+ # 
+ # total_shot_chart <- rbind(total_shot_chart, data.frame(final_zone = NA, frequency = NA, pps = NA, 
+ #                                                        league_frequency = NA,league_pps = NA, x = NA,
+ #                                                        y = NA, freq_over_avg = .4, pps_over_avg = NA))
+ # 
+ # total_shot_chart <- rbind(total_shot_chart, data.frame(final_zone = NA, frequency = NA, pps = NA, 
+ #                                                        league_frequency = NA,league_pps = NA, x = NA,
+ #                                                        y = NA, freq_over_avg = -.2, pps_over_avg = NA))
+ # 
+ 
+ 
+ shot_chart_nba <- 
+   
+   
+ ggplot(total_shot_chart,aes(x = x,y = y))+
+   theme_nothing()+
+   geom_path(data=data.frame(x=c(-25,-25,25,25,-25),y=c(-47,47,47,-47,-47)))+
+   geom_path(data=data.frame(x=c(-6000:(-1)/1000,1:6000/1000),y=c(28-sqrt(6^2-c(-6000:(-1)/1000,1:6000/1000)^2))),aes(x=x,y=y))+
+   geom_path(data=data.frame(x=c(-6000:(-1)/1000,1:6000/1000),y=-c(28-sqrt(6^2-c(-6000:(-1)/1000,1:6000/1000)^2))),aes(x=x,y=y))+
+   geom_path(data=data.frame(x=c(-8,-8,8,8,-8),y=c(47,28,28,47,47)))+
+   geom_path(data=data.frame(x=-c(-8,-8,8,8,-8),y=-c(47,28,28,47,47)))+
+   geom_path(data=data.frame(x=c(-750:(-1)/1000,1:750/1000,750:1/1000,-1:-750/1000),y=c(c(41.75+sqrt(0.75^2-c(-750:(-1)/1000,1:750/1000)^2)),c(41.75-sqrt(0.75^2-c(750:1/1000,-1:-750/1000)^2)))),aes(x=x,y=y))+
+   geom_path(data=data.frame(x=c(-750:(-1)/1000,1:750/1000,750:1/1000,-1:-750/1000),y=-c(c(41.75+sqrt(0.75^2-c(-750:(-1)/1000,1:750/1000)^2)),c(41.75-sqrt(0.75^2-c(750:1/1000,-1:-750/1000)^2)))),aes(x=x,y=y))+
+   geom_path(data=data.frame(x=c(-3,3),y=c(43,43)),lineend='butt')+
+   geom_path(data=data.frame(x=c(-3,3),y=-c(43,43)),lineend='butt')+
+   geom_path(data=data.frame(x=c(-22,-22,-22000:(-1)/1000,1:22000/1000,22,22),y=c(47,47-169/12,41.75-sqrt(23.75^2-c(-22000:(-1)/1000,1:22000/1000)^2),47-169/12,47)),aes(x=x,y=y))+
+   geom_path(data=data.frame(x=c(-22,-22,-22000:(-1)/1000,1:22000/1000,22,22),y=-c(47,47-169/12,41.75-sqrt(23.75^2-c(-22000:(-1)/1000,1:22000/1000)^2),47-169/12,47)),aes(x=x,y=y))+
+   coord_fixed()+
+   ylim(-48, -10) +
+   geom_point(aes(size = frequency, fill = pps_over_avg), pch = 21,color = "black")+
+   #scale_fill_gradient2(low = "blue", mid = "white", high = "gold", name = "PPS Compared to Avg") +
+   scale_fill_gradientn(colors = c("blue","steelblue1","white", "#FFFF99", "gold"),
+                        limits = c(-.25, .25), 
+                        breaks = c(-.25,0,.25), labels = c("Bad", "Average","Elite"), name = "")+
+   guides(fill = guide_colourbar(theme = theme(
+     legend.ticks = element_blank(),
+     legend.key.width  = unit(20, "lines"),
+     legend.key.height = unit(1, "lines"))))+
+   # (low = "blue", mid = "white", high = "gold", name = "PPS Compared to Avg") +
+   # scale_size(range = c(1, 30),
+   #            breaks = c(-.2, -.1, 0, .1, .2, .3, .4),
+   #            labels = c("-20%", "-10%", "0%", "10%", "20%", "30%", "40%")) 
+    scale_size_continuous(name = "frequency", range = c(1, 25), guide = FALSE) +
+   geom_text(aes(label = pps), size = 6, vjust = -2.3)+
+   geom_text(aes(x = -18, y = -13,label = "Size = Volume of Shots"), size = 4)+
+   geom_text(aes(x = 18, y = -13,label = "Color = Points Per Shot"), size = 4)+
+   #labs(title = "Scoring Efficiency and Volume By Zone")+
+   theme(plot.title = element_text(size = 14, hjust = 0.5))+
+   theme(legend.position = "bottom")
+ 
+ 
+ 
+ 
+ 
+ 
+   geom_point(aes(x = 0,y = -40),shape = 13, fill="red", color="red", size=16)
+ 
+ 
+ 
+   
+   
+   
+   
+ ggplot(data, aes(x = x, y = y)) +
+   geom_point(aes(size = frequency, color = efficiency), alpha = 0.7) +  # Use alpha for transparency
+   scale_color_gradient(low = "lightgreen", high = "darkgreen", name = "Efficiency") +
+   scale_size_continuous(name = "Frequency", range = c(2, 10)) +  # Adjust size range
+   theme_minimal() +
+   labs(title = "Scatter Plot of Shot Frequency and Efficiency", 
+        x = "X Coordinate", 
+        y = "Y Coordinate") +
+   theme(legend.position = "right")
+ 
+ 
+ 
+ plot_court(court_themes$white, use_short_three = F)+
+   geom_point(data = court_ppp,
+              aes(x = mloc_x, y = mloc_y, fill = court_ppp$ind_ppsround), pch = 21, color = "black", size = 12)+
+   scale_fill_gradient2(midpoint = median(pps$pps_individual), low = "blue", mid = "white", high = "red")+
+   geom_text(data = court_ppp,
+             aes(x = mloc_x, y = mloc_y, label = court_ppp$ind_ppsround), size = 8, vjust = -1.5)+
+   geom_text_repel()+
+   #scale_color_manual(values = c(palette), aesthetics = c("fill", "color"))+
+   scale_color_gradient2(midpoint = median(pps$pps_individual), low = "blue", mid = "white", high = "red")+
+   scale_x_continuous(limits = c(-27.5, 27.5)) +
+   scale_y_continuous(limits = c(0, 45))+
+   theme(
+     legend.position="none",
+     #legend.title = element_blank(),
+     plot.background = element_rect(fill="white", color = "white"),
+     panel.background = element_rect(fill="white", color = "white"))
+ 
+ 
+ 
+ 
+ ### Shot Bar Chart
+ 
+ help("get_tracking")
+ tracking_efficiency <-  get_tracking(season = 2023, 'Player', measure_type = "Efficiency",per_mode = "Totals")
+ tracking_efficiency <-  get_tracking(season = 2023, 'Player', measure_type = "CatchShoot")
+ 
+ 
+ efficiency_filtered <- tracking_efficiency%>%
+   filter(min >= 100)%>%
+   mutate(avg_drive_fg_pct = mean(drive_fg_pct),
+          avg_catch_shoot_fg_pct = mean(catch_shoot_fg_pct),
+          avg_pull_up_fg_pct = mean(pull_up_fg_pct),
+          dif_drive_fg_pct = drive_fg_pct - avg_drive_fg_pct,
+          dif_catch_shoot_fg_pct = catch_shoot_fg_pct - avg_catch_shoot_fg_pct,
+          dif_pull_up_fg_pct = pull_up_fg_pct - avg_pull_up_fg_pct)
+ 
+ 
+ 
+ tracking_efficiency_condensed <- efficiency_filtered%>%
+   filter(player_name == "Jalen Brunson")%>%
+   reframe(drive_fg_pct, dif_drive_fg_pct, catch_shoot_fg_pct, dif_catch_shoot_fg_pct,
+           pull_up_fg_pct, dif_pull_up_fg_pct)%>%
+   pivot_longer(c(drive_fg_pct,catch_shoot_fg_pct,pull_up_fg_pct),
+                names_to = "stat",values_to = "fg_pct")%>%
+   pivot_longer(c(dif_drive_fg_pct,dif_catch_shoot_fg_pct,dif_pull_up_fg_pct),
+                names_to = "stat2",values_to = "dif_fg_pct")%>%
+   mutate(shot_type = case_when(stat == "drive_fg_pct" & stat2 == "dif_drive_fg_pct" ~ "Drive",
+                                stat == "catch_shoot_fg_pct" & stat2 == "dif_catch_shoot_fg_pct" ~ "Catch & Shoot",
+                                stat == "pull_up_fg_pct" & stat2 == "dif_pull_up_fg_pct" ~ "Pull Up"))%>%
+   drop_na()%>%
+   reframe(shot_type, fg_pct, dif_fg_pct)
+   
+   
+   # 
+   # mutate(shot_type = case_when(
+   #   str_detect(names(efficiency_filtered), "^drive") ~ "Drive",
+   #   str_detect(names(efficiency_filtered), "^catch") ~ "Catch & Shoot",
+   #   str_detect(names(efficiency_filtered), "^pull") ~ "Pull Up"))
+   # 
+   
+   #mutate(across(all_of(starts_with(reverse_cols)), ~1 - .x))
+ 
+ 
+ 
+ 
+ player_bar <- player_shot_detail%>%
+   mutate(shot_type = case_when(SHOT_ZONE_BASIC == "Restricted Area" ~ "Rim",
+                                       SHOT_ZONE_BASIC == "In The Paint (Non-RA)" |
+                                         (SHOT_ZONE_BASIC == "Mid-Range" &
+                                            SHOT_ZONE_RANGE == "8-16 ft.") ~ "Short Mid",
+                                       SHOT_ZONE_RANGE == "16-24 ft." & 
+                                         SHOT_TYPE != "3PT Field Goal" ~ "Long Mid",
+                                       SHOT_TYPE == "3PT Field Goal" ~ "3P"))%>%
+   mutate_at(c("SHOT_MADE_FLAG","SHOT_ATTEMPTED_FLAG"), as.numeric)%>%
+   group_by(shot_type)%>%
+   mutate(fg_pct = sum(SHOT_MADE_FLAG) / sum(SHOT_ATTEMPTED_FLAG))%>%
+   reframe(shot_type,fg_pct)%>%
+   distinct(shot_type,.keep_all = TRUE)
+          
+  
+ 
+ league_bar <- league_shot_detail%>%
+   mutate(shot_type = case_when(SHOT_ZONE_BASIC == "Restricted Area" ~ "Rim",
+                                       SHOT_ZONE_BASIC == "In The Paint (Non-RA)" |
+                                         (SHOT_ZONE_BASIC == "Mid-Range" &
+                                            SHOT_ZONE_RANGE == "8-16 ft.") ~ "Short Mid",
+                                       SHOT_ZONE_RANGE == "16-24 ft." & 
+                                         (SHOT_ZONE_BASIC != "Left Corner 3" |
+                                            SHOT_ZONE_BASIC != "Right Corner 3" |
+                                            SHOT_ZONE_BASIC != "Above the Break 3") ~ "Long Mid",
+                                       SHOT_ZONE_BASIC == "Left Corner 3" |
+                                         SHOT_ZONE_BASIC == "Right Corner 3" |
+                                         SHOT_ZONE_BASIC == "Above the Break 3" |
+                                         SHOT_ZONE_BASIC == "Backcourt"~ "3P"))%>%
+   mutate_at(c("FGA","FGM"), as.numeric)%>%
+   group_by(shot_type)%>%
+   mutate(league_general_location_fg_pct = sum(FGM) / sum(FGA))%>%
+   reframe(shot_type,league_general_location_fg_pct)%>%
+   distinct(shot_type,.keep_all = TRUE)
+ 
+ 
+ 
+ join_player_bar <- left_join(player_bar ,league_bar, by = c("shot_type"))
+ 
+ join_player_bar <- join_player_bar%>%
+   mutate(dif_fg_pct = fg_pct - league_general_location_fg_pct)%>%
+   reframe(shot_type, fg_pct, dif_fg_pct)
+ 
+ 
+ player_game_box = load_nba_player_box(
+   seasons = 2024)
+ 
+ free_throws <- player_game_box%>%
+   filter(season_type != 3)%>%
+   mutate_at(c("free_throws_made","free_throws_attempted"), as.numeric)%>%
+   mutate_all(~replace(., is.na(.), 0))%>%
+   mutate(league_avg_ft = sum(free_throws_made)/sum(free_throws_attempted))%>%
+   filter(athlete_display_name == "Jalen Brunson")%>%
+   mutate(fg_pct = sum(free_throws_made)/sum(free_throws_attempted),
+          dif_fg_pct = fg_pct - league_avg_ft,
+          shot_type = "FT")%>%
+   reframe(shot_type, fg_pct, dif_fg_pct)%>%
+   distinct()
+ 
+ 
+ 
+ shooting_bar_chart_data <- rbind(join_player_bar,tracking_efficiency_condensed,free_throws)
+ 
+ 
+ 
+ 
+ shooting <-  
+   
+   
+   ggplot(shooting_bar_chart_data,aes(x = factor(shot_type,levels=c("Drive", "Pull Up", "Catch & Shoot", "FT",
+                                                                    "Rim", "Short Mid", "Long Mid", "3P")),
+                              y = dif_fg_pct, fill = dif_fg_pct, label = scales::percent(dif_fg_pct,accuracy = 0.1))) +
+   geom_bar(color = "black", width = .4,stat = "identity", size = .4) +
+   scale_fill_gradientn(colors = c("blue","steelblue1","white", "#FFFF99", "gold"),limits = c(-.2,.2),
+                        breaks = c(-.15,0,.15), name = "")+
+   geom_text(size = 6, color = "black",vjust = ifelse(shooting_bar_chart_data$dif_fg_pct < 0, 1.3, -.5))+
+   
+   geom_text(data = shooting_bar_chart_data, 
+             aes(x = as.numeric(factor(shot_type,
+               levels=c("Drive", "Pull Up", "Catch & Shoot", "FT",
+                "Rim", "Short Mid", "Long Mid", "3P")))+.03, 
+                 y = -.17, label = scales::percent(fg_pct, accuracy = 0.1)), size = 4) +
+   
+   geom_text(data = shooting_bar_chart_data, aes(x = as.numeric(factor(shot_type,
+                                                               levels=c("Drive"))) - .38,
+                                         y = -.165, label = "Plyr Avg", size = .04)) +
+   geom_text(data = shooting_bar_chart_data, aes(x = as.numeric(factor(shot_type,
+                                                               levels=c("Drive"))) - .365,
+                                         y = -.03, label = "NBA Avg", size = .04)) +
+   
+   theme_nothing() +
+   scale_y_continuous(labels = percent,limits = c(-.18,.2))+
+   geom_hline(yintercept = 0, linetype = "solid", color = "black")+
+   #geom_vline(xintercept = as.numeric(shooting_bar_chart_data$shot_type[shooting_bar_chart_data$shot_type == "Free Throw"]- .39), linetype = "solid", color = "black")+
+   labs(x = "",
+        y = "",
+        caption = "By: Bucknell Analytics | Data: hoopR & NBAr",
+        title = "Shooting % vs. NBA Average")+
+   theme(plot.title = element_text(size = 30, hjust = 0.5))+
+   theme(strip.text = element_text(size=20))+
+   theme(axis.text.y = element_blank(),
+         legend.position = "none",
+         plot.title = element_text(hjust = 0.5,size = 16),
+         axis.text.x = element_text(size=16),
+         plot.caption = element_text(size = 10, hjust = 1),
+         panel.background = element_blank())
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ ### Contested Shots Table
+ 
+ 
+ 
+ very_tight_contest <- nba_leaguedashplayerptshot(season = "2023-24", 
+                                                  measure_type = "Base",   
+                                                  per_mode = "Totals",
+                                                  close_def_dist_range = "0-2 Feet - Very Tight")
+ 
+ very_tight_contest <- as.data.frame(very_tight_contest)
+ 
+ very_tight_contest <- very_tight_contest%>%
+   mutate(type = "Very Tight")
+ 
+ 
+ 
+ tight_contest <- nba_leaguedashplayerptshot(season = "2023-24", 
+                                             measure_type = "Base",   
+                                             per_mode = "Totals",
+                                             close_def_dist_range = "2-4 Feet - Tight")
+ 
+ tight_contest <- as.data.frame(tight_contest)
+ 
+ tight_contest <- tight_contest%>%
+   mutate(type = "Tight")
+ 
+ 
+ open <- nba_leaguedashplayerptshot(season = "2023-24", 
+                                    measure_type = "Base",   
+                                    per_mode = "Totals",
+                                    close_def_dist_range = "4-6 Feet - Open")
+ 
+ open <- as.data.frame(open)
+ 
+ open <- open%>%
+   mutate(type = "Open")
+ 
+ 
+ wide_open <- nba_leaguedashplayerptshot(season = "2023-24", 
+                                         measure_type = "Base",   
+                                         per_mode = "Totals",
+                                         close_def_dist_range = "6+ Feet - Wide Open")
+ 
+ wide_open <- as.data.frame(wide_open)
+ 
+ wide_open <- wide_open%>%
+   mutate(type = "Wide Open")
+ 
+ 
+ contested_total <- rbind(very_tight_contest,tight_contest,open,wide_open)
+ 
+ 
+ 
+ names(contested_filtered)
+ 
+ contested_filtered <- contested_total%>%
+    rename_with(~str_remove(., 'LeagueDashPTShots.'))%>%
+    mutate_at(c("EFG_PCT","FG2A_FREQUENCY", "FGA_FREQUENCY","FG3A_FREQUENCY","FG2M",
+                "FG3M","FG2_PCT", "FG3_PCT","FGA"), as.numeric)%>%
+   group_by(type)%>%
+   mutate(pps = round(((2*FG2M) + (3* FG3M))/FGA,2),
+          percentile_FGA_FREQUENCY = rank(FGA_FREQUENCY)/length(FGA_FREQUENCY),
+          percentile_FGA_FREQUENCY = percentile_FGA_FREQUENCY * 100,
+          percentile_pps = rank(pps)/length(pps),
+          percentile_pps = percentile_pps * 100,
+          percentile_FG2A_FREQUENCY = rank(FG2A_FREQUENCY)/length(FG2A_FREQUENCY),
+          percentile_FG2A_FREQUENCY = percentile_FG2A_FREQUENCY * 100,
+          percentile_FG2_PCT = rank(FG2_PCT)/length(FG2_PCT),
+          percentile_FG2_PCT = percentile_FG2_PCT * 100,
+          percentile_FG3A_FREQUENCY = rank(FG3A_FREQUENCY)/length(FG3A_FREQUENCY),
+          percentile_FG3A_FREQUENCY = percentile_FG3A_FREQUENCY * 100,
+          percentile_FG3_PCT = rank(FG3_PCT)/length(FG3_PCT),
+          percentile_FG3_PCT = percentile_FG3_PCT * 100)%>%
+   ungroup()%>%
+   filter(PLAYER_NAME == "Jalen Brunson")%>%
+   reframe(type,FGA_FREQUENCY,pps,FG2A_FREQUENCY,FG2_PCT,FG3A_FREQUENCY,FG3_PCT,
+           percentile_FGA_FREQUENCY, percentile_pps, percentile_FG2A_FREQUENCY,
+           percentile_FG2_PCT, percentile_FG3A_FREQUENCY, percentile_FG3_PCT)
+ 
+ 
+ 
+ 
+ 
+ contested_chart <- 
+   
+   gt(contested_filtered)%>%
+   gt_theme_538()%>%
+   cols_hide(c(percentile_FGA_FREQUENCY, percentile_pps, percentile_FG2A_FREQUENCY,
+               percentile_FG2_PCT, percentile_FG3A_FREQUENCY, percentile_FG3_PCT)) %>% 
+   cols_label(type = "Contested Shot?",
+              FGA_FREQUENCY = "Freq",
+              pps = "PPS",
+              FG2A_FREQUENCY = "Freq",
+              FG2_PCT = "FG %",
+              FG3A_FREQUENCY = "Freq",
+              FG3_PCT = "FG %")%>%
+   data_color(columns = percentile_FGA_FREQUENCY,
+              target_columns = FGA_FREQUENCY,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   data_color(columns = percentile_pps,
+              target_columns = pps,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   data_color(columns = percentile_FG2A_FREQUENCY,
+              target_columns = FG2A_FREQUENCY,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   data_color(columns = percentile_FG2_PCT,
+              target_columns = FG2_PCT,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   data_color(columns = percentile_FG3A_FREQUENCY,
+              target_columns = FG3A_FREQUENCY,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   data_color(columns = percentile_FG3_PCT,
+              target_columns = FG3_PCT,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   fmt_percent(columns = c(FGA_FREQUENCY,FG2A_FREQUENCY,FG2_PCT,FG3A_FREQUENCY,FG3_PCT),decimals = 1)%>%
+   #fmt_number(columns = c(PPP),decimals = 2)%>%
+   #fmt_number(columns = c(percentile_freq,PERCENTILE),decimals = 0)%>%
+   gt_add_divider(type, color = 'black', include_labels = FALSE) %>%
+   gt_add_divider(pps, color = 'black', include_labels = FALSE) %>%
+   gt_add_divider(FG2_PCT, color = 'black', include_labels = FALSE) %>%
+   gt::cols_align(columns = c(everything()),"center")%>%
+   tab_spanner(columns = c(FGA_FREQUENCY,pps),label = "Total")%>%
+   tab_spanner(columns = c(FG2A_FREQUENCY,FG2_PCT),label = "2's")%>%
+   tab_spanner(columns = c(FG3A_FREQUENCY,FG3_PCT),label = "3's")
+    
+ 
+ 
+ conts<- tempfile(fileext = ".png")
+ gtsave(contested_chart,conts)
+ contested_chart_png <- png::readPNG(conts,native = TRUE)
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ ## Box Score Stats
+ 
+ 
+ general_box <- get_general(season = 2023, type = 'Player',per_mode = "Totals",
+                        season_type = "Regular+Season",measure_type = "Base")
+ 
+ general_box <- general_box%>%
+   mutate(game_score = round(pts + .4*fgm - .7*fga - .4*(fta-ftm) + .7*oreb +.3*dreb+ stl +.7*ast + .7*blk -.4*pf-tov,1))%>%
+   reframe(player_id, player_name, min, game_score, pts, oreb, dreb,ast,tov,stl,blk)
+ 
+ 
+ 
+ general_adv <- get_general(season = 2023, type = 'Player',per_mode = "Totals",
+                        season_type = "Regular+Season",measure_type = "Advanced")
+ 
+ 
+ general_adv <- general_adv%>%
+   reframe(player_id,ast_to,usg_pct,efg_pct, ts_pct, poss, off_rating, def_rating, net_rating)
+ 
+ 
+ 
+ box_score <- left_join(general_box,general_adv, by = c("player_id"))
+ 
+ 
+ 
+ box_per75 <- box_score%>%
+   filter(min > 300)%>%
+   mutate(game_score_per75 = round((game_score/poss)*75,1),
+          pts_per75 = round((pts/poss)*75,1), 
+          oreb_per75 = round((oreb/poss)*75,1), 
+          dreb_per75 = round((dreb/poss)*75,1),
+          ast_per75 = round((ast/poss)*75,1),
+          tov_per75 = round((tov/poss)*75,1),
+          stl_per75 = round((stl/poss)*75,1),
+          blk_per75 = round((blk/poss)*75,1),
+          
+          percentile_game_score_per75 = rank(game_score_per75)/length(game_score_per75),
+          percentile_game_score_per75 = percentile_game_score_per75 * 100,
+          percentile_pts_per75 = rank(pts_per75)/length(pts_per75),
+          percentile_pts_per75 = percentile_pts_per75 * 100,
+          percentile_oreb_per75 = rank(oreb_per75)/length(oreb_per75),
+          percentile_oreb_per75 = percentile_oreb_per75 * 100,
+          percentile_dreb_per75 = rank(dreb_per75)/length(dreb_per75),
+          percentile_dreb_per75 = percentile_dreb_per75 * 100,
+          percentile_ast_per75 = rank(ast_per75)/length(ast_per75),
+          percentile_ast_per75 =  percentile_ast_per75 * 100,
+          percentile_tov_per75 = rank(tov_per75)/length(tov_per75),
+          percentile_tov_per75 = percentile_tov_per75 * 100,
+          percentile_stl_per75 = rank(stl_per75)/length(stl_per75),
+          percentile_stl_per75 = percentile_stl_per75 * 100,
+          percentile_blk_per75 = rank(blk_per75)/length(blk_per75),
+          percentile_blk_per75 = percentile_blk_per75 * 100,
+          
+          percentile_ast_to = rank(ast_to)/length(ast_to),
+          percentile_ast_to = percentile_ast_to * 100,
+          percentile_usg_pct = rank(usg_pct)/length(usg_pct),
+          percentile_usg_pct = percentile_usg_pct * 100,
+          percentile_efg_pct = rank(efg_pct)/length(efg_pct),
+          percentile_efg_pct = percentile_efg_pct * 100,
+          percentile_ts_pct = rank(ts_pct)/length(ts_pct),
+          percentile_ts_pct = percentile_ts_pct * 100,
+          percentile_off_rating = rank(off_rating)/length(off_rating),
+          percentile_off_rating = percentile_off_rating * 100,
+          percentile_def_rating = rank(def_rating)/length(def_rating),
+          percentile_def_rating = percentile_def_rating * 100,
+          percentile_net_rating = rank(net_rating)/length(net_rating),
+          percentile_net_rating = percentile_net_rating * 100,)%>%
+   filter(player_name == "Jalen Brunson")%>%
+   reframe(game_score_per75, pts_per75, oreb_per75, dreb_per75,ast_per75,
+           tov_per75,stl_per75,blk_per75,ast_to,usg_pct,
+           efg_pct, ts_pct, off_rating, def_rating, net_rating,
+
+           percentile_game_score_per75, percentile_pts_per75, percentile_oreb_per75, percentile_dreb_per75,percentile_ast_per75,
+           percentile_tov_per75,percentile_stl_per75,percentile_blk_per75,percentile_ast_to,percentile_usg_pct,
+           percentile_efg_pct, percentile_ts_pct,percentile_off_rating, percentile_def_rating, percentile_net_rating)
+   
+
+ 
+ 
+ 
+ 
+ 
+ 
+ box_chart <- 
+   
+   gt(box_per75)%>%
+   gt_theme_538()%>%
+   cols_hide(c(percentile_game_score_per75, percentile_pts_per75, percentile_oreb_per75, percentile_dreb_per75,percentile_ast_per75,
+               percentile_tov_per75,percentile_stl_per75,percentile_blk_per75,percentile_ast_to,percentile_usg_pct,
+               percentile_efg_pct, percentile_ts_pct,
+               usg_pct,efg_pct, ts_pct,ast_to,off_rating, def_rating, net_rating,
+               percentile_off_rating, percentile_def_rating, percentile_net_rating)) %>% 
+   cols_label(game_score_per75 = "Game Score",
+              pts_per75 = "PTS", 
+              oreb_per75 = "OREBs", 
+              dreb_per75 = "DREBs",
+              ast_per75 = "ASTs",
+              tov_per75 = "TOVs",
+              stl_per75 = "STLs",
+              blk_per75 = "BLKs")%>%
+   data_color(columns = percentile_game_score_per75,
+              target_columns = game_score_per75,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   data_color(columns = percentile_pts_per75,
+              target_columns = pts_per75,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   data_color(columns = percentile_oreb_per75,
+              target_columns = oreb_per75,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   data_color(columns = percentile_dreb_per75,
+              target_columns = dreb_per75,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   data_color(columns = percentile_ast_per75,
+              target_columns = ast_per75,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   data_color(columns = percentile_tov_per75,
+              target_columns = tov_per75,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   data_color(columns = percentile_stl_per75,
+              target_columns = stl_per75,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   data_color(columns = percentile_blk_per75,
+              target_columns = blk_per75,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   #fmt_percent(columns = c(usg_pct,efg_pct,ts_pct),decimals = 1)%>%
+   #fmt_number(columns = c(percentile_freq,PERCENTILE),decimals = 0)%>%
+   # gt_add_divider(type, color = 'black', include_labels = FALSE) %>%
+   # gt_add_divider(pps, color = 'black', include_labels = FALSE) %>%
+   # gt_add_divider(FG2_PCT, color = 'black', include_labels = FALSE) %>%
+   gt::cols_align(columns = c(everything()),"center")%>%
+   tab_spanner(columns = c(game_score_per75, pts_per75, oreb_per75, dreb_per75,ast_per75,
+                           tov_per75,stl_per75,blk_per75),label = "Per 75 Poss")
+ 
+ 
+ 
+ 
+ box<- tempfile(fileext = ".png")
+ gtsave(box_chart,box)
+ box_chart_png <- png::readPNG(box,native = TRUE)
+ 
+ 
+ 
+ 
+ advanced <- box_per75%>%
+   reframe(usg_pct,efg_pct, ts_pct, off_rating, def_rating, net_rating,
+           percentile_usg_pct,percentile_efg_pct, percentile_ts_pct,percentile_off_rating, percentile_def_rating, percentile_net_rating)
+ 
+ 
+ 
+ 
+ box_chart2 <- 
+   
+   gt(advanced)%>%
+   gt_theme_538()%>%
+   cols_hide(c(percentile_usg_pct,percentile_efg_pct, percentile_ts_pct,
+               percentile_off_rating, percentile_def_rating, percentile_net_rating)) %>% 
+   cols_label(usg_pct = "USG%",
+              efg_pct = "eFG%", 
+              ts_pct = "TS%",
+              off_rating = "Off Rating",
+              def_rating = "Def Rating",
+              net_rating = "Net Rating")%>%
+   data_color(columns = percentile_usg_pct,
+              target_columns = usg_pct,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   data_color(columns = percentile_efg_pct,
+              target_columns = efg_pct,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   data_color(columns = percentile_ts_pct,
+              target_columns = ts_pct,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   data_color(columns = percentile_off_rating,
+              target_columns = off_rating,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   data_color(columns = percentile_def_rating,
+              target_columns = def_rating,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   data_color(columns = percentile_net_rating,
+              target_columns = net_rating,
+              palette = c("blue","steelblue1","white", "#FFFF99", "gold"),
+              domain = c(0,100))%>%
+   fmt_percent(columns = c(usg_pct,efg_pct,ts_pct),decimals = 1)%>%
+   #fmt_number(columns = c(percentile_freq,PERCENTILE),decimals = 0)%>%
+   # gt_add_divider(type, color = 'black', include_labels = FALSE) %>%
+   # gt_add_divider(pps, color = 'black', include_labels = FALSE) %>%
+   # gt_add_divider(FG2_PCT, color = 'black', include_labels = FALSE) %>%
+   gt::cols_align(columns = c(everything()),"center")%>%
+   tab_spanner(columns = c(usg_pct,efg_pct, ts_pct, off_rating, def_rating, net_rating),label = "Advanced")
+ 
+ 
+ 
+ 
+ box2<- tempfile(fileext = ".png")
+ gtsave(box_chart2,box2)
+ box_chart2_png <- png::readPNG(box2,native = TRUE)
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ ### Player Bio Details
+ 
+ 
+ general <- get_general(season = 2023, type = 'Player',per_mode = "Totals",
+                        season_type = "Regular+Season",measure_type = "Defense")
+ 
+ 
+ 
+ 
+ bio <- nba_leaguedashplayerbiostats(season = year_to_season(2023),
+                                     season_type = "Regular Season")
+ 
+ bio <- as.data.frame(bio)
+ 
+ bio <- bio %>%
+   rename_with(~str_remove(., 'LeagueDashPlayerBioStats.'))%>%
+   reframe(PLAYER_NAME,AGE,PLAYER_HEIGHT,PLAYER_WEIGHT)
+ 
+ 
+ logos <- hoopR::load_nba_player_box(2024)%>%
+   reframe(athlete_display_name,athlete_position_abbreviation,athlete_headshot_href,team_logo)
+ 
+ 
+ logos <- logos[!duplicated(logos$athlete_display_name), ]
+ 
+ 
+ player_details <- left_join(bio,logos, by = c("PLAYER_NAME" = "athlete_display_name"))
+ 
+ player_details <- player_details%>%
+   filter(PLAYER_NAME == "Jalen Brunson")
+ 
+ details <- player_details%>% 
+   mutate(AGE = paste0(AGE, " y/o"),
+          year = "2023-24",
+          test = paste0(athlete_position_abbreviation, "  |  ",AGE,"  |  ", PLAYER_HEIGHT,"  |  ", PLAYER_WEIGHT))%>%
+   reframe(athlete_position_abbreviation,AGE, PLAYER_HEIGHT, PLAYER_WEIGHT,year,test)
+   
+ 
+ 
+ details <- 
+   
+   gt(details)%>%
+   gt_theme_nytimes()%>%
+   cols_hide(year)%>%
+   # cols_label(values = "",
+   #            values.1 = "")%>%
+   cols_label(athlete_position_abbreviation = "",
+              AGE = "",
+              PLAYER_HEIGHT = "",
+              PLAYER_WEIGHT = "")%>%
+   #gt_add_divider(values, color = 'lightgray', include_labels = FALSE,weight = .5) %>%
+   gt::cols_align(
+     align = "center",
+     columns = c(athlete_position_abbreviation, AGE, PLAYER_HEIGHT, PLAYER_WEIGHT))
+ 
+ 
+ dets<- tempfile(fileext = ".png")
+ gtsave(details,dets)
+ details_png <- png::readPNG(dets,native = TRUE)
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ ## Title 
+ 
+ 
+ headshot <- ggplot(data = player_details)+
+   theme_minimal()+
+   ggdraw()+
+   draw_image(player_details$athlete_headshot_href,hjust = .5)
+ 
+ name <- 
+   ggplot(data = player_details)+
+   theme_void()+
+   geom_text(aes(x = 1, y = 1.5, label = PLAYER_NAME), size = 10)+
+   # geom_text(aes(x = 1, y = 1, label = player_season$exp, size = 1))+
+   # geom_text(aes(x = 0, y = 1.3, label = player_season$pos, size = .5))+
+   # geom_text(aes(x = 1, y = 1.3, label = player_season$hgt, size = .5))+
+   theme(axis.text.y = element_blank(),
+         legend.position = "none",
+         axis.text.x = element_blank(),
+         plot.caption = element_text(size = 8),
+         panel.background = element_blank())
+ 
+ 
+ team_logo <- ggplot(data = player_details)+
+   theme_minimal()+
+   ggdraw()+
+   draw_image(player_details$team_logo,hjust = .5)
+ 
+ 
+ 
+ details_chart <- 
+   ggplot(data = details)+
+   theme_void()+
+   geom_text(aes(x = 1, y = 1.5, label = test), size = 4.3)+
+   # geom_text(aes(x = 1, y = 1, label = player_season$exp, size = 1))+
+   # geom_text(aes(x = 0, y = 1.3, label = player_season$pos, size = .5))+
+   # geom_text(aes(x = 1, y = 1.3, label = player_season$hgt, size = .5))+
+   theme(axis.text.y = element_blank(),
+         legend.position = "none",
+         axis.text.x = element_blank(),
+         plot.caption = element_text(size = 8),
+         panel.background = element_blank())
+ 
+ 
+ 
+ year <- 
+   ggplot(data = details)+
+   theme_void()+
+   geom_text(aes(x = 1, y = 1.5, label = year), size = 6)+
+   # geom_text(aes(x = 1, y = 1, label = player_season$exp, size = 1))+
+   # geom_text(aes(x = 0, y = 1.3, label = player_season$pos, size = .5))+
+   # geom_text(aes(x = 1, y = 1.3, label = player_season$hgt, size = .5))+
+   theme(axis.text.y = element_blank(),
+         legend.position = "none",
+         axis.text.x = element_blank(),
+         plot.caption = element_text(size = 8),
+         panel.background = element_blank())
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ # 
+ # 
+ # chartss <- (usg + game_score) / 
+ #   (rim + efg) / 
+ #   (three + three_m_perc )+
+ #   plot_layout(nrow  =3)+
+ #   plot_annotation(title = "2024 Progression",
+ #                   theme = theme(plot.title = element_text(size = 16, hjust = 0.6),
+ #                                 plot.subtitle = element_text(size = 12, hjust = 0.5)))
+ 
+ # 
+ back_table <- (wrap_elements(background_png) + kpi) +plot_layout(nrow=2,heights = c(1,3))
+ 
+ 
+ 
+ 
+ new_name <- name / (wrap_elements(details_png)) + plot_layout(heights = c(1,2), widths = c(1,1))
+ 
+ 
+ 
+ 
+ titles <- team_logo | (name) | headshot
+ 
+ 
+ 
+ #bio <-  (wrap_elements(details_png) | (box_chart_png)) + plot_layout(widths = c(1,5))
+ 
+ bio <-  ((year) | (box_chart_png) | (details_chart)) + plot_layout(heights = c(1,20,1))
+
+ 
+ #bio_row <- ((bio) | (plot_spacer())) + plot_layout(widths = c(1,5,1))
+ 
+header <- titles/bio
+
+
+((header) / (wrap_elements(synergy_table_png) | shot_chart_nba |contested_chart_png) / (shooting))  + plot_layout(heights = c(.55,.65,3,.9))
+
+
+
+
+
+
+
+
+
+
+
+
+
+new_name <- (name / details_chart) + plot_layout(heights = c(2,1), widths = c(1,1))
+
+
+
+
+titles <- team_logo | (new_name) | headshot
+
+
+#header <- ((titles) / (details_chart)) + plot_layout(heights = c(50,1))
+
+# 
+# right_middle <- (wrap_elements(box_chart_png) / (box_chart2_png) / (contested_chart_png)) + plot_layout(heights = c(1.25,1.15,2.75))
+# right_middle <- (wrap_elements(box_chart_png) / (contested_chart_png)) + plot_layout(heights = c(1.25,2.75))
+# 
+
+
+# middle <- (wrap_elements(synergy_table_png) | shot_chart_nba | (right_middle)) + plot_layout(widths = c(1,.95,1))
+                                                      
+
+middle <- (wrap_elements(synergy_table_png) | (shot_chart_nba)) + plot_layout(widths = c(.8,1.2))
+#middle <- (wrap_elements(synergy_table_png) | (right_middle)) + plot_layout(widths = c(1,1))
+
+
+#total <- ((header) / middle / (shooting))  + plot_layout(nrow = 4,heights = c(.95,.15,3.8,1.5))
+total <- ((titles) / middle / (shooting))  + plot_layout(nrow = 3,heights = c(1.1,3.8,1.5))
+
+
+(total | plot_spacer()) + plot_layout(widths = c(5,1))
+ 
