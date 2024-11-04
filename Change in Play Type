@@ -1,0 +1,635 @@
+
+
+
+## Team Change
+
+
+
+
+### Synergy Play Types 25
+
+
+synergy_iso <- nba_synergyplaytypes(
+  per_mode = "Totals",
+  play_type = 'Isolation',
+  player_or_team = "T",
+  season = 2024,
+  season_type = "Regular Season",
+  type_grouping = "Offensive"
+)
+
+
+synergy_iso <- as.data.frame(synergy_iso)
+
+synergy_iso <- synergy_iso %>%
+  rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+  mutate_at(c("POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+  reframe(TEAM_ABBREVIATION,PLAY_TYPE,POSS_PCT,PPP, PERCENTILE)
+
+
+
+synergy_Transition <- nba_synergyplaytypes(
+  per_mode = "Totals",
+  play_type = 'Transition',
+  player_or_team = "T",
+  season = 2024,
+  season_type = "Regular Season",
+  type_grouping = "Offensive"
+)
+
+
+synergy_Transition <- as.data.frame(synergy_Transition)
+
+synergy_Transition <- synergy_Transition %>%
+  rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+  mutate_at(c("POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+  reframe(TEAM_ABBREVIATION,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+
+
+
+
+synergy_PRBallHandler <- nba_synergyplaytypes(
+  per_mode = "Totals",
+  play_type = 'PRBallHandler',
+  player_or_team = "T",
+  season = 2024,
+  season_type = "Regular Season",
+  type_grouping = "Offensive"
+)
+
+
+synergy_PRBallHandler <- as.data.frame(synergy_PRBallHandler)
+
+synergy_PRBallHandler <- synergy_PRBallHandler %>%
+  rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+  mutate_at(c("POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+  reframe(TEAM_ABBREVIATION,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+
+
+
+
+synergy_PRRollman <- nba_synergyplaytypes(
+  per_mode = "Totals",
+  play_type = 'PRRollman',
+  player_or_team = "T",
+  season = 2024,
+  season_type = "Regular Season",
+  type_grouping = "Offensive"
+)
+
+
+synergy_PRRollman <- as.data.frame(synergy_PRRollman)
+
+synergy_PRRollman <- synergy_PRRollman %>%
+  rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+  mutate_at(c("POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+  reframe(TEAM_ABBREVIATION,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+
+
+
+
+synergy_Postup <- nba_synergyplaytypes(
+  per_mode = "Totals",
+  play_type = 'Postup',
+  player_or_team = "T",
+  season = 2024,
+  season_type = "Regular Season",
+  type_grouping = "Offensive"
+)
+
+
+synergy_Postup <- as.data.frame(synergy_Postup)
+
+synergy_Postup <- synergy_Postup %>%
+  rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+  mutate_at(c("POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+  reframe(TEAM_ABBREVIATION,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+
+
+
+
+synergy_Spotup <- nba_synergyplaytypes(
+  per_mode = "Totals",
+  play_type = 'Spotup',
+  player_or_team = "T",
+  season = 2024,
+  season_type = "Regular Season",
+  type_grouping = "Offensive"
+)
+
+
+synergy_Spotup <- as.data.frame(synergy_Spotup)
+
+synergy_Spotup <- synergy_Spotup %>%
+  rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+  mutate_at(c("POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+  reframe(TEAM_ABBREVIATION,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+
+
+
+
+synergy_Handoff <- nba_synergyplaytypes(
+  per_mode = "Totals",
+  play_type = 'Handoff',
+  player_or_team = "T",
+  season = 2024,
+  season_type = "Regular Season",
+  type_grouping = "Offensive"
+)
+
+
+synergy_Handoff <- as.data.frame(synergy_Handoff)
+
+synergy_Handoff <- synergy_Handoff %>%
+  rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+  mutate_at(c("POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+  reframe(TEAM_ABBREVIATION,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+
+
+
+
+synergy_Cut <- nba_synergyplaytypes(
+  per_mode = "Totals",
+  play_type = 'Cut',
+  player_or_team = "T",
+  season = 2024,
+  season_type = "Regular Season",
+  type_grouping = "Offensive"
+)
+
+
+synergy_Cut <- as.data.frame(synergy_Cut)
+
+synergy_Cut <- synergy_Cut%>%
+  rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+  mutate_at(c("POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+  reframe(TEAM_ABBREVIATION,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+
+
+
+synergy_OffScreen <- nba_synergyplaytypes(
+  per_mode = "Totals",
+  play_type = 'OffScreen',
+  player_or_team = "T",
+  season = 2024,
+  season_type = "Regular Season",
+  type_grouping = "Offensive"
+)
+
+
+synergy_OffScreen <- as.data.frame(synergy_OffScreen)
+
+synergy_OffScreen <- synergy_OffScreen %>%
+  rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+  mutate_at(c("POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+  reframe(TEAM_ABBREVIATION,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+
+
+
+synergy_total <- rbind(synergy_iso,synergy_OffScreen,synergy_Handoff,synergy_Postup,
+                       synergy_PRRollman,synergy_PRBallHandler,synergy_Cut,synergy_Spotup,
+                       synergy_Transition)
+
+
+synergy_chart25 <- synergy_total%>%
+  group_by(PLAY_TYPE)%>%
+  # mutate(percentile_freq = rank(POSS_PCT)/length(POSS_PCT),
+  #        percentile_freq = percentile_freq * 100,
+  #        PERCENTILE = PERCENTILE * 100)%>%
+  filter(TEAM_ABBREVIATION == "BKN")%>%
+  reframe(PLAY_TYPE,POSS_PCT,PPP)%>%
+  arrange(desc(POSS_PCT))
+
+
+
+
+
+
+
+
+
+
+
+### Synergy Play Types 24
+
+
+synergy_iso <- nba_synergyplaytypes(
+  per_mode = "Totals",
+  play_type = 'Isolation',
+  player_or_team = "T",
+  season = 2023,
+  season_type = "Regular Season",
+  type_grouping = "Offensive"
+)
+
+
+synergy_iso <- as.data.frame(synergy_iso)
+
+synergy_iso <- synergy_iso %>%
+  rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+  mutate_at(c("POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+  reframe(TEAM_ABBREVIATION,PLAY_TYPE,POSS_PCT,PPP, PERCENTILE)
+
+
+
+synergy_Transition <- nba_synergyplaytypes(
+  per_mode = "Totals",
+  play_type = 'Transition',
+  player_or_team = "T",
+  season = 2023,
+  season_type = "Regular Season",
+  type_grouping = "Offensive"
+)
+
+
+synergy_Transition <- as.data.frame(synergy_Transition)
+
+synergy_Transition <- synergy_Transition %>%
+  rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+  mutate_at(c("POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+  reframe(TEAM_ABBREVIATION,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+
+
+
+
+synergy_PRBallHandler <- nba_synergyplaytypes(
+  per_mode = "Totals",
+  play_type = 'PRBallHandler',
+  player_or_team = "T",
+  season = 2023,
+  season_type = "Regular Season",
+  type_grouping = "Offensive"
+)
+
+
+synergy_PRBallHandler <- as.data.frame(synergy_PRBallHandler)
+
+synergy_PRBallHandler <- synergy_PRBallHandler %>%
+  rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+  mutate_at(c("POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+  reframe(TEAM_ABBREVIATION,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+
+
+
+
+synergy_PRRollman <- nba_synergyplaytypes(
+  per_mode = "Totals",
+  play_type = 'PRRollman',
+  player_or_team = "T",
+  season = 2023,
+  season_type = "Regular Season",
+  type_grouping = "Offensive"
+)
+
+
+synergy_PRRollman <- as.data.frame(synergy_PRRollman)
+
+synergy_PRRollman <- synergy_PRRollman %>%
+  rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+  mutate_at(c("POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+  reframe(TEAM_ABBREVIATION,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+
+
+
+
+synergy_Postup <- nba_synergyplaytypes(
+  per_mode = "Totals",
+  play_type = 'Postup',
+  player_or_team = "T",
+  season = 2023,
+  season_type = "Regular Season",
+  type_grouping = "Offensive"
+)
+
+
+synergy_Postup <- as.data.frame(synergy_Postup)
+
+synergy_Postup <- synergy_Postup %>%
+  rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+  mutate_at(c("POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+  reframe(TEAM_ABBREVIATION,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+
+
+
+
+synergy_Spotup <- nba_synergyplaytypes(
+  per_mode = "Totals",
+  play_type = 'Spotup',
+  player_or_team = "T",
+  season = 2023,
+  season_type = "Regular Season",
+  type_grouping = "Offensive"
+)
+
+
+synergy_Spotup <- as.data.frame(synergy_Spotup)
+
+synergy_Spotup <- synergy_Spotup %>%
+  rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+  mutate_at(c("POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+  reframe(TEAM_ABBREVIATION,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+
+
+
+
+synergy_Handoff <- nba_synergyplaytypes(
+  per_mode = "Totals",
+  play_type = 'Handoff',
+  player_or_team = "T",
+  season = 2023,
+  season_type = "Regular Season",
+  type_grouping = "Offensive"
+)
+
+
+synergy_Handoff <- as.data.frame(synergy_Handoff)
+
+synergy_Handoff <- synergy_Handoff %>%
+  rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+  mutate_at(c("POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+  reframe(TEAM_ABBREVIATION,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+
+
+
+
+synergy_Cut <- nba_synergyplaytypes(
+  per_mode = "Totals",
+  play_type = 'Cut',
+  player_or_team = "T",
+  season = 2023,
+  season_type = "Regular Season",
+  type_grouping = "Offensive"
+)
+
+
+synergy_Cut <- as.data.frame(synergy_Cut)
+
+synergy_Cut <- synergy_Cut%>%
+  rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+  mutate_at(c("POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+  reframe(TEAM_ABBREVIATION,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+
+
+
+synergy_OffScreen <- nba_synergyplaytypes(
+  per_mode = "Totals",
+  play_type = 'OffScreen',
+  player_or_team = "T",
+  season = 2023,
+  season_type = "Regular Season",
+  type_grouping = "Offensive"
+)
+
+
+synergy_OffScreen <- as.data.frame(synergy_OffScreen)
+
+synergy_OffScreen <- synergy_OffScreen %>%
+  rename_with(~str_remove(., 'SynergyPlayType.'))%>%
+  mutate_at(c("POSS_PCT","PPP","PERCENTILE"), as.numeric)%>%
+  reframe(TEAM_ABBREVIATION,PLAY_TYPE,POSS_PCT,PPP,PERCENTILE)
+
+
+
+synergy_total <- rbind(synergy_iso,synergy_OffScreen,synergy_Handoff,synergy_Postup,
+                       synergy_PRRollman,synergy_PRBallHandler,synergy_Cut,synergy_Spotup,
+                       synergy_Transition)
+
+
+synergy_chart24 <- synergy_total%>%
+  group_by(PLAY_TYPE)%>%
+  # mutate(percentile_freq = rank(POSS_PCT)/length(POSS_PCT),
+  #        percentile_freq = percentile_freq * 100,
+  #        PERCENTILE = PERCENTILE * 100)%>%
+  filter(TEAM_ABBREVIATION == "BKN")%>%
+  reframe(PLAY_TYPE,POSS_PCT,PPP)%>%
+  arrange(desc(POSS_PCT))
+
+
+synergy_chart_total <- left_join(synergy_chart24,synergy_chart25, by = c("PLAY_TYPE"))
+
+synergy_team_chart <- synergy_chart_total%>%
+  mutate(freq_dif = POSS_PCT.y - POSS_PCT.x,
+         PPP_dif = PPP.y - PPP.x)%>%
+  reframe(PLAY_TYPE,POSS_PCT.x,POSS_PCT.y,freq_dif,PPP.x,PPP.y,PPP_dif)
+
+  
+
+gt(synergy_team_chart)%>%
+  gt_theme_538()%>%
+  #cols_hide(c(percentile_freq,PERCENTILE)) %>% 
+  cols_label(PLAY_TYPE = "Action",
+             POSS_PCT.x = "2023-24",
+             POSS_PCT.y = "2024-25",
+             PPP.x = "2023-24",
+             PPP.y = "2024-25",
+             freq_dif = "Change",
+             PPP_dif = "Change")%>%
+  data_color(columns = freq_dif,
+             target_columns = freq_dif,
+             palette = c("red", "indianred1","white", "steelblue1", "blue"),
+             domain = c(-.025,.025))%>%
+  data_color(columns = PPP_dif,
+             target_columns = PPP_dif,
+             palette = c("red", "indianred1","white", "steelblue1", "blue"),
+             domain = c(-.55,.55))%>%
+  fmt_percent(columns = c(POSS_PCT.x,POSS_PCT.y,freq_dif),decimals = 1)%>%
+  fmt_number(columns = c(PPP.x,PPP.y,PPP_dif),decimals = 2)%>%
+  gt_add_divider(freq_dif, color = 'black', include_labels = FALSE) %>%
+  gt::cols_align(columns = c(everything()),"center")%>%
+  tab_spanner(columns = c(POSS_PCT.x,POSS_PCT.y,freq_dif),label = "Frequency")%>%
+  tab_spanner(columns = c(PPP.x,PPP.y,PPP_dif),label = "Efficiency")%>%
+  tab_header(title = "Brooklyn Nets Play Type Changes")%>%
+  opt_align_table_header("center")%>%
+  tab_footnote(locations = cells_column_labels(columns = freq_dif),
+               footnote = "Change in Percentage of Possessions")%>%
+  tab_footnote(locations = cells_column_labels(columns = PPP_dif),
+               footnote = "Change in Points Per Possession")
+
+
+
+
+
+### Team Contested Shots Table
+
+
+
+very_tight_contest <- nba_leaguedashteamptshot(season = "2023-24", 
+                                                 measure_type = "Base",   
+                                                 per_mode = "Totals",
+                                                 close_def_dist_range = "0-2 Feet - Very Tight")
+
+very_tight_contest <- as.data.frame(very_tight_contest)
+
+very_tight_contest <- very_tight_contest%>%
+  mutate(type = "Very Tight")
+
+
+
+tight_contest <- nba_leaguedashteamptshot(season = "2023-24", 
+                                            measure_type = "Base",   
+                                            per_mode = "Totals",
+                                            close_def_dist_range = "2-4 Feet - Tight")
+
+tight_contest <- as.data.frame(tight_contest)
+
+tight_contest <- tight_contest%>%
+  mutate(type = "Tight")
+
+
+open <- nba_leaguedashteamptshot(season = "2023-24", 
+                                   measure_type = "Base",   
+                                   per_mode = "Totals",
+                                   close_def_dist_range = "4-6 Feet - Open")
+
+open <- as.data.frame(open)
+
+open <- open%>%
+  mutate(type = "Open")
+
+
+wide_open <- nba_leaguedashteamptshot(season = "2023-24", 
+                                        measure_type = "Base",   
+                                        per_mode = "Totals",
+                                        close_def_dist_range = "6+ Feet - Wide Open")
+
+wide_open <- as.data.frame(wide_open)
+
+wide_open <- wide_open%>%
+  mutate(type = "Wide Open")
+
+
+contested_total <- rbind(very_tight_contest,tight_contest,open,wide_open)
+
+
+
+
+contested_filtered24 <- contested_total%>%
+  rename_with(~str_remove(., 'LeagueDashPTShots.'))%>%
+  mutate_at(c("EFG_PCT","FG2A_FREQUENCY", "FGA_FREQUENCY","FG3A_FREQUENCY","FG2M",
+              "FG3M","FG2_PCT", "FG3_PCT","FGA"), as.numeric)%>%
+  filter(TEAM_ABBREVIATION == "LAC")%>%
+  reframe(type,FG2A_FREQUENCY,FG2_PCT,FG3A_FREQUENCY,FG3_PCT)
+
+
+
+
+
+
+### Team Contested Shots Table 2025
+
+
+
+very_tight_contest <- nba_leaguedashteamptshot(season = "2024-25", 
+                                               measure_type = "Base",   
+                                               per_mode = "Totals",
+                                               close_def_dist_range = "0-2 Feet - Very Tight")
+
+very_tight_contest <- as.data.frame(very_tight_contest)
+
+very_tight_contest <- very_tight_contest%>%
+  mutate(type = "Very Tight")
+
+
+
+tight_contest <- nba_leaguedashteamptshot(season = "2024-25", 
+                                          measure_type = "Base",   
+                                          per_mode = "Totals",
+                                          close_def_dist_range = "2-4 Feet - Tight")
+
+tight_contest <- as.data.frame(tight_contest)
+
+tight_contest <- tight_contest%>%
+  mutate(type = "Tight")
+
+
+open <- nba_leaguedashteamptshot(season = "2024-25", 
+                                 measure_type = "Base",   
+                                 per_mode = "Totals",
+                                 close_def_dist_range = "4-6 Feet - Open")
+
+open <- as.data.frame(open)
+
+open <- open%>%
+  mutate(type = "Open")
+
+
+wide_open <- nba_leaguedashteamptshot(season = "2024-25", 
+                                      measure_type = "Base",   
+                                      per_mode = "Totals",
+                                      close_def_dist_range = "6+ Feet - Wide Open")
+
+wide_open <- as.data.frame(wide_open)
+
+wide_open <- wide_open%>%
+  mutate(type = "Wide Open")
+
+
+contested_total <- rbind(very_tight_contest,tight_contest,open,wide_open)
+
+
+
+
+contested_filtered25 <- contested_total%>%
+  rename_with(~str_remove(., 'LeagueDashPTShots.'))%>%
+  mutate_at(c("EFG_PCT","FG2A_FREQUENCY", "FGA_FREQUENCY","FG3A_FREQUENCY","FG2M",
+              "FG3M","FG2_PCT", "FG3_PCT","FGA"), as.numeric)%>%
+  filter(TEAM_ABBREVIATION == "LAC")%>%
+  reframe(type,FG2A_FREQUENCY,FG2_PCT,FG3A_FREQUENCY,FG3_PCT)
+
+
+
+
+
+team_contested <- left_join(contested_filtered24,contested_filtered25, by = c("type"))
+
+
+
+team_contested_chart <- team_contested%>%
+  #mutate_at(c("FG2A_FREQUENCY", "FG3A_FREQUENCY"), as.numeric)%>%
+  mutate(FG2A_dif = FG2A_FREQUENCY.y - FG2A_FREQUENCY.x,
+         FG3A_dif = FG3A_FREQUENCY.y - FG3A_FREQUENCY.x,
+         FG2_PCT_dif = FG2_PCT.y - FG2_PCT.x,
+         FG3_PCT_dif = FG3_PCT.y - FG3_PCT.x)%>%
+  reframe(type,FG2A_FREQUENCY.x,FG2A_FREQUENCY.y,FG2A_dif,FG3A_FREQUENCY.x,FG3A_FREQUENCY.y,FG3A_dif)
+
+
+
+
+
+gt(team_contested_chart)%>%
+  gt_theme_538()%>%
+  #cols_hide(c(percentile_freq,PERCENTILE)) %>% 
+  cols_label(type = "Contested Shot?",
+             FG2A_FREQUENCY.x = "2023-24",
+             FG2A_FREQUENCY.y = "2024-25",
+             FG3A_FREQUENCY.x = "2023-24",
+             FG3A_FREQUENCY.y = "2024-25",
+             FG2A_dif = "Change",
+             FG3A_dif = "Change")%>%
+  data_color(columns = FG2A_dif,
+             target_columns = FG2A_dif,
+             palette = c("red", "indianred1","white", "steelblue1", "blue"),
+             domain = c(-.05,.05))%>%
+  data_color(columns = FG3A_dif,
+             target_columns = FG3A_dif,
+             palette = c("red", "indianred1","white", "steelblue1", "blue"),
+             domain = c(-.08,.08))%>%
+  fmt_percent(columns = c(FG2A_FREQUENCY.x,FG2A_FREQUENCY.y,FG2A_dif,
+                          FG3A_FREQUENCY.x,FG3A_FREQUENCY.y,FG3A_dif),decimals = 1)%>%
+  #fmt_number(columns = c(PPP.x,PPP.y,PPP_dif),decimals = 2)%>%
+  gt_add_divider(type, color = 'black', include_labels = FALSE) %>%
+  gt_add_divider(FG2A_dif, color = 'black', include_labels = FALSE) %>%
+  gt::cols_align(columns = c(everything()),"center")%>%
+  tab_spanner(columns = c(FG2A_FREQUENCY.x,FG2A_FREQUENCY.y,FG2A_dif),label = "2's")%>%
+  tab_spanner(columns = c(FG3A_FREQUENCY.x,FG3A_FREQUENCY.y,FG3A_dif),label = "3's")%>%
+  #tab_spanner(columns = c(everything()),label = "Frequency")%>%
+  tab_header(title = "Contested Shot Frequency Changes ",subtitle= "LA Clippers")%>%
+  opt_align_table_header("center")%>%
+  tab_source_note(source_note = "By Bucknell Analytics | Data: NBAr")%>%
+  tab_footnote(locations = cells_column_labels(columns = FG2A_dif),
+               footnote = "Change in Percentage of 2P Shot Attempts")%>%
+  tab_footnote(locations = cells_column_labels(columns = FG3A_dif),
+               footnote = "Change in Percentage of 3P Shot Attempts")
+
+
+
