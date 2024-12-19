@@ -1,0 +1,86 @@
+
+
+## Possession Battle
+
+
+
+general_box <- get_general(season = 2024, type = 'Team',per_mode = "PerGame",
+                           season_type = "Regular+Season",measure_type = "Base")
+
+general_box_opp <- get_general(season = 2024, type = 'Team',per_mode = "PerGame",
+                           season_type = "Regular+Season",measure_type = "Opponent")
+
+general_box_opp <- general_box_opp%>%
+  reframe(team_id,opp_oreb,opp_fta,opp_tov)
+
+poss_total <- left_join(general_box,general_box_opp, by = c("team_id"))
+
+possession_battle <- poss_total%>%
+  mutate(poss_battle = (oreb + (fta * .44) - tov) - (opp_oreb + (opp_fta * .44) - opp_tov))
+
+
+logos <- hoopR::load_nba_player_box(2025)%>%
+  reframe(team_display_name,team_logo,team_abbreviation)
+
+
+logos <- logos[!duplicated(logos$team_display_name), ]
+
+
+poss_full <- left_join(possession_battle,logos, by = c("team_name"="team_display_name"))
+
+poss_table <- poss_full%>%
+  arrange(-poss_battle)%>%
+  mutate(Rank = row_number())%>%
+  reframe(Rank,team_abbreviation, team_logo, w_pct,poss_battle)
+  
+  
+  
+
+tab1 <- poss_table %>%
+  dplyr::slice(1:15) 
+
+
+tab2 <- poss_table %>%
+  dplyr::slice(16:30) 
+
+
+tab_combined <- data.frame(tab1,tab2)
+
+
+
+
+tab_combined%>%
+  gt()%>%
+  gt_theme_538()%>%
+  gtExtras::gt_img_rows(team_logo)%>%
+  gtExtras::gt_img_rows(team_logo.1)%>%
+  data_color(columns = c(poss_battle,poss_battle.1),
+             target_columns = c(poss_battle,poss_battle.1),
+             palette = c("red", "indianred1","white", "steelblue1","blue"),
+             domain = c(-6.2,6.2))%>%
+  data_color(columns = c(w_pct,w_pct.1),
+             target_columns = c(w_pct,w_pct.1),
+             palette = c("red", "indianred1","white", "steelblue1","blue"),
+             domain = c(.13,.85))%>%
+  cols_label(team_logo = " ",
+             team_abbreviation = "Team",
+             poss_battle = "Poss Per Game",
+             w_pct = "Winning %",
+             Rank.1 = "Rank",
+             team_logo.1 = " ",
+             team_abbreviation.1 = "Team",
+             poss_battle.1 = "Poss Per Game",
+             w_pct.1 = "Winning %")%>%
+  fmt_number(columns = c(poss_battle,poss_battle.1),decimals = 1)%>%
+  fmt_percent(columns = c(w_pct,w_pct.1),decimals = 1)%>%
+  gt_add_divider(poss_battle, color = 'black', include_labels = FALSE) %>%
+  gt::cols_align(columns = c(everything()),"center")%>%
+  tab_header(title = "Team Possession Battle",subtitle = "2024-25 Season")%>%
+  tab_source_note(source_note = "By Bucknell Analytics | Data: hoopR & NBAr")%>%
+  opt_align_table_header("center")%>%
+  tab_footnote(locations = cells_column_labels(columns = c(poss_battle,poss_battle.1)),
+               footnote = "(OREB + (FTA * .44) - TOV) - (Opp OREB + (Opp FTA * .44) - Opp TOV)")
+
+
+
+
