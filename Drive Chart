@@ -1,0 +1,291 @@
+
+  
+ 
+ #### Dive Chart ######
+ 
+ library(NBAr)
+ 
+ help("get_shooting")
+ 
+ logos <- hoopR::load_nba_player_box(2025)%>%
+   reframe(athlete_display_name, athlete_short_name,athlete_position_abbreviation,team_abbreviation,athlete_headshot_href,team_logo)
+ 
+ 
+ logos <- logos[!duplicated(logos$athlete_display_name), ]
+ 
+ tracking <-  get_tracking(season = 2024, 'Player', per_mode = "Totals",measure_type = "Drives")
+ pull_up <-  get_tracking(season = 2023, 'Player', per_mode = "Totals",measure_type = "Efficiency")
+ 
+ 
+ tracking <- tracking%>%
+  mutate(player_name = if_else(player_name == "Luka Dončić", "Luka Doncic",player_name))
+ 
+ 
+ 
+ 
+ touches <-  get_tracking(season = 2024, 'Player', per_mode = "Totals",measure_type = "Possessions")
+ 
+ 
+ touches <- touches%>%
+   reframe(player_id,touches)
+ 
+ touches <- left_join(tracking,touches, by = c("player_id"))
+ 
+ touches <- left_join(touches, logos, by = c("player_name"="athlete_display_name"))
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ drives_touches <- touches%>%
+   mutate(position_group = case_when(
+     athlete_position_abbreviation == "PG" | athlete_position_abbreviation == "SG" 
+     | athlete_position_abbreviation == "G"~ "G",
+     athlete_position_abbreviation == "SF" | athlete_position_abbreviation == "PF" 
+     | athlete_position_abbreviation == "F"~ "F",
+     athlete_position_abbreviation == "C" ~ "C"))%>%
+   filter(position_group == "G")%>%
+   filter(min >200 & drives >10)%>%
+   group_by(position_group)%>%
+   mutate(drive_rate = (drives/touches),
+          fga_rate = (drive_fga/drives),
+          ftr = drive_fta/drive_fga,
+          turnover_rate = drive_tov/drives,
+          ppp = drive_pts/drives,
+          avg_drive_rate = sum(drives)/sum(touches),
+          avg_fga_rate = sum(drive_fga)/sum(drives),
+          avg_drive_passes_pct = mean(drive_passes_pct),
+          avg_ftr = sum(drive_fta)/sum(drive_fga),
+          avg_turnover_rate = sum(drive_tov)/sum(drives),
+          avg_ppp = sum(drive_pts)/sum(drives),
+          avg_fg_pct = sum(drive_fgm)/sum(drive_fga),
+          avg_assist = sum(drive_ast)/sum(drives),
+          diff_drive_rate = percent(drive_rate - avg_drive_rate,accuracy = .1),
+          diff_fga_rate = percent(fga_rate - avg_fga_rate,accuracy = .1),
+          diff_drive_passes_pct = percent(drive_passes_pct - avg_drive_passes_pct,accuracy = .1),
+          diff_ftr = percent(ftr - avg_ftr,accuracy = .1),
+          diff_turnover_rate = percent(turnover_rate - avg_turnover_rate,accuracy = .1),
+          diff_ppp = round(ppp - avg_ppp,2),
+          diff_drive_rate = ifelse(diff_drive_rate > 0, paste0("+", diff_drive_rate),diff_drive_rate),
+          diff_fga_rate = ifelse(diff_fga_rate > 0, paste0("+", diff_fga_rate),diff_fga_rate),
+          diff_drive_passes_pct = ifelse(diff_drive_passes_pct > 0, paste0("+", diff_drive_passes_pct),diff_drive_passes_pct),
+          diff_ftr = ifelse(diff_ftr > 0, paste0("+", diff_ftr),diff_ftr),
+          diff_turnover_rate = ifelse(diff_turnover_rate > 0, paste0("+", diff_turnover_rate),diff_turnover_rate),
+          diff_ppp = ifelse(diff_ppp > 0, paste0("+", diff_ppp),diff_ppp),
+          diff_fg_pct = percent(drive_fg_pct - avg_fg_pct,accuracy = .1),
+          diff_fg_pct = ifelse(diff_fg_pct > 0, paste0("+", diff_fg_pct),diff_fg_pct),
+          diff_assist = percent(drive_ast_pct - avg_assist,accuracy = .1),
+          diff_assist = ifelse(diff_assist > 0, paste0("+", diff_assist),diff_assist))
+ 
+ 
+ player_filter <- drives_touches%>%
+   filter(player_name == "Ja'Kobe Walter")%>%
+   mutate(player_name_title = paste0(player_name, " Drive Chart"),
+          drive_rate = percent(drive_rate,accuracy = .1),
+          drive_rate = paste0("(",drive_rate,")"),
+          fga_rate = percent(fga_rate,accuracy = .1),
+          fga_rate = paste0("(",fga_rate,")"),
+          ftr = percent(ftr,accuracy = .1),
+          ftr = paste0("(",ftr,")"),
+          turnover_rate = percent(turnover_rate,accuracy = .1),
+          turnover_rate = paste0("(",turnover_rate,")"),
+          drive_fg_pct = percent(drive_fg_pct,accuracy = .1),
+          drive_fg_pct = paste0("(",drive_fg_pct,")"),
+          drive_passes_pct = percent(drive_passes_pct,accuracy = .1),
+          drive_passes_pct = paste0("(",drive_passes_pct,")"),
+          drive_ast_pct = percent(drive_ast_pct,accuracy = .1),
+          drive_ast_pct = paste0("(",drive_ast_pct,")"),
+          ppp = round(ppp,2),
+          ppp = paste0("(",ppp,")"))
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ drive_plot <- ggplot(data=data.frame(x=1,y=1),aes(x,y))+
+   theme_nothing()+
+   ###outside box:
+   geom_path(data=data.frame(x=c(-25,-25,25,25,-25),y=c(-47,47,47,-47,-47)))+
+   ###solid FT semicircle above FT line:
+   geom_path(data=data.frame(x=c(-6000:(-1)/1000,1:6000/1000),y=c(28-sqrt(6^2-c(-6000:(-1)/1000,1:6000/1000)^2))),aes(x=x,y=y))+
+   geom_path(data=data.frame(x=c(-6000:(-1)/1000,1:6000/1000),y=-c(28-sqrt(6^2-c(-6000:(-1)/1000,1:6000/1000)^2))),aes(x=x,y=y))+
+   ###key:
+   geom_path(data=data.frame(x=c(-8,-8,8,8,-8),y=c(47,28,28,47,47)))+
+   geom_path(data=data.frame(x=-c(-8,-8,8,8,-8),y=-c(47,28,28,47,47)))+
+   ###rim:
+   geom_path(data=data.frame(x=c(-750:(-1)/1000,1:750/1000,750:1/1000,-1:-750/1000),y=c(c(41.75+sqrt(0.75^2-c(-750:(-1)/1000,1:750/1000)^2)),c(41.75-sqrt(0.75^2-c(750:1/1000,-1:-750/1000)^2)))),aes(x=x,y=y))+
+   geom_path(data=data.frame(x=c(-750:(-1)/1000,1:750/1000,750:1/1000,-1:-750/1000),y=-c(c(41.75+sqrt(0.75^2-c(-750:(-1)/1000,1:750/1000)^2)),c(41.75-sqrt(0.75^2-c(750:1/1000,-1:-750/1000)^2)))),aes(x=x,y=y))+
+   ###backboard:
+   geom_path(data=data.frame(x=c(-3,3),y=c(43,43)),lineend='butt')+
+   geom_path(data=data.frame(x=c(-3,3),y=-c(43,43)),lineend='butt')+
+   ###three-point line:
+   geom_path(data=data.frame(x=c(-22,-22,-22000:(-1)/1000,1:22000/1000,22,22),y=c(47,47-169/12,41.75-sqrt(23.75^2-c(-22000:(-1)/1000,1:22000/1000)^2),47-169/12,47)),aes(x=x,y=y))+
+   geom_path(data=data.frame(x=c(-22,-22,-22000:(-1)/1000,1:22000/1000,22,22),y=-c(47,47-169/12,41.75-sqrt(23.75^2-c(-22000:(-1)/1000,1:22000/1000)^2),47-169/12,47)),aes(x=x,y=y))+
+   ###fix aspect ratio to 1:1
+   coord_fixed()+
+   #xlim(-25, 20) +
+   ylim(-50, -12) +
+   # Drive Rate
+   geom_text(aes(x = 0, y = -13,
+       label = "Drive Rate per Touch"),size = 8)+
+   geom_text(aes(x = 0, y = -15,
+           label = player_filter$diff_drive_rate), size = 8)+
+   geom_text(aes(x = 0, y = -16.5,
+                 label = player_filter$drive_rate), size = 4)+
+   #Drive Arrow
+   geom_curve(
+     aes(x = -3, y = -15, xend = -10, yend = -35),
+     arrow = arrow(
+       length = unit(0.03, "npc"), 
+       type="closed"), # Describes arrow head (open or closed)
+       colour = "#EC7014",
+       size = 1.4,
+       angle = 90)+
+   #Shot Arrow
+   geom_curve(
+     aes(x = -8, y = -34.5, xend = 0, yend = -40),
+     arrow = arrow(
+       length = unit(0.03, "npc"), 
+       type="closed"), # Describes arrow head (open or closed)
+     colour = "blue",
+     size = 1.2,
+     angle = 90,
+     curvature = -1)+
+   #Pass Line
+   geom_segment(aes(x = -12, y = -35, xend = -20, yend = -29),
+                arrow = arrow(
+                  length = unit(0.03, "npc"), 
+                  type="closed"),
+                color = "blue",size = 1.2)+
+   #Assist Line
+   geom_segment(aes(x = -23, y = -25.5, xend = -23, yend = -21.5),
+                arrow = arrow(
+                  length = unit(0.03, "npc"), 
+                  type="closed"),
+                color = "blue",size = 1.2)+
+   #Turnover Line
+   geom_segment(aes(x = -10, y = -36.5, xend = -10, yend = -43),
+                linetype = 2, size = 1.2,colour = "red")+
+   geom_point(aes(x = -10,y = -45),shape = 13, fill="red", color="red", size=16)+
+   #FTR Line
+   geom_segment(aes(x = -8, y = -32.5, xend = -1, yend = -28),
+                linetype = 2, size = 1.2,colour = "blue")+
+   #Pass% Label
+   geom_text(aes(x = -23, y = -27,
+                 label = "Pass %"), size = 8)+
+   geom_text(aes(x = -23, y = -29,
+                 label = player_filter$diff_drive_passes_pct), size = 8)+
+   geom_text(aes(x = -23, y = -30.5,
+                 label = player_filter$drive_passes_pct), size = 4)+
+   #Assist% Label
+   geom_text(aes(x = -23, y = -17,
+                 label = "Assist %"), size = 8)+
+   geom_text(aes(x = -23, y = -19,
+                 label = player_filter$diff_assist), size = 8)+
+   geom_text(aes(x = -23, y = -20.5,
+                 label = player_filter$drive_ast_pct), size = 4)+
+   #Turnover% Label
+   geom_text(aes(x = -16, y = -42,
+                 label = "Turnover %"), size = 8)+
+   geom_text(aes(x = -16, y = -44,
+                 label = player_filter$diff_turnover_rate), size = 8)+
+   geom_text(aes(x = -16, y = -45.5,
+                 label = player_filter$turnover_rate), size = 4)+
+   #FGA% Label
+   geom_text(aes(x = 4, y = -32.5,
+                 label = "Shot Attempt %"), size = 8)+
+   geom_text(aes(x = 4, y = -34.5,
+                 label = player_filter$diff_fga_rate), size = 8)+
+   geom_text(aes(x = 4, y = -36,
+                 label = player_filter$fga_rate), size = 4)+
+   #FG% Label
+   geom_text(aes(x = 5, y = -39,
+                 label = "FG%"), size = 8)+
+   geom_text(aes(x = 5, y = -41,
+                 label = player_filter$diff_fg_pct), size = 8)+
+   geom_text(aes(x = 5, y = -42.5,
+                 label = player_filter$drive_fg_pct), size = 4)+
+   #FTR% Label
+   geom_text(aes(x = 0, y = -24,
+                 label = "FT Rate"), size = 8)+
+   geom_text(aes(x = 0, y = -26,
+                 label = player_filter$diff_ftr), size = 7)+
+   geom_text(aes(x = 0, y = -27.4,
+                 label = player_filter$ftr), size = 4)+
+   #PPP Label
+   geom_text(aes(x = 18, y = -17,
+                 label = "Drive Pts per Poss"), size = 8)+
+   geom_text(aes(x = 18, y = -19,
+                 label = player_filter$diff_ppp), size = 8)+
+   geom_text(aes(x = 18, y = -20.5,
+                 label = player_filter$ppp), size = 4)+
+   #Drive Chart
+   # geom_text(aes(x = -20, y = -13,
+   #               label = "*vs. Positional Avg"), size = 8)+
+   geom_text(aes(x = 15, y = -46,
+                 label = "Bucknell Analytics | Data: NBAr"), size = 4)
+
+
+
+
+ 
+ headshot <- ggplot(data = player_filter)+
+   theme_minimal()+
+   ggdraw()+
+   draw_image(player_filter$athlete_headshot_href,hjust = .5)
+ 
+ name <- 
+   ggplot(data = player_filter)+
+   theme_void()+
+   geom_text(aes(x = 1, y = 1.5, label = player_name), size = 9)+
+   # geom_text(aes(x = 1, y = 1, label = player_season$exp, size = 1))+
+   # geom_text(aes(x = 0, y = 1.3, label = player_season$pos, size = .5))+
+   # geom_text(aes(x = 1, y = 1.3, label = player_season$hgt, size = .5))+
+   theme(axis.text.y = element_blank(),
+         legend.position = "none",
+         axis.text.x = element_blank(),
+         plot.caption = element_text(size = 8),
+         panel.background = element_blank())
+ 
+ 
+ drive_label <- 
+   ggplot(data = player_filter)+
+   theme_void()+
+   geom_text(aes(x = 1, y = 1.5, label = "Drive Chart vs. Positional Avg"), size = 6)+
+   # geom_text(aes(x = 1, y = 1, label = player_season$exp, size = 1))+
+   # geom_text(aes(x = 0, y = 1.3, label = player_season$pos, size = .5))+
+   # geom_text(aes(x = 1, y = 1.3, label = player_season$hgt, size = .5))+
+   theme(axis.text.y = element_blank(),
+         legend.position = "none",
+         axis.text.x = element_blank(),
+         plot.caption = element_text(size = 7),
+         panel.background = element_blank())
+ 
+ 
+ 
+ 
+ 
+ team_logo <- ggplot(data = player_filter)+
+   theme_minimal()+
+   ggdraw()+
+   draw_image(player_filter$team_logo,hjust = .5)
+ 
+   
+ 
+ middle <- name/drive_label
+ 
+ 
+ titles <-  (headshot | middle | team_logo) + plot_layout(widths = c(.39,.21,.39))
+ 
+ (titles / drive_plot) + plot_layout(heights = c(.1,.9))
+ 
+ 
+   
+   
+      
