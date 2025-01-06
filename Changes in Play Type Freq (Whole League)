@@ -1,0 +1,103 @@
+
+## For Player
+synergy_chart_total <- left_join(synergy_chart25,synergy_chart24, by = c("PLAY_TYPE"))
+
+# For All Players
+synergy_chart_total <- left_join(synergy_chart25,synergy_chart24, by = c("PLAYER_NAME","PLAY_TYPE"))
+
+synergy_player_chart <- synergy_chart_total%>%
+  mutate(freq_dif = POSS_PCT.x - POSS_PCT.y,
+         PPP_dif = PPP.x - PPP.y)%>%
+  reframe(PLAYER_NAME,PLAY_TYPE,POSS_PCT.y,POSS_PCT.x,freq_dif,PPP.y,PPP.x,PPP_dif)
+
+  
+
+general_adv <- get_general(season = 2024, type = 'Player',per_mode = "Totals",
+                           season_type = "Regular+Season",measure_type = "Advanced")
+
+
+general_adv <- general_adv%>%
+  reframe(player_name,usg_pct)
+
+
+synergy_player_all<- left_join(synergy_player_chart, general_adv, by = c("PLAYER_NAME" = "player_name"))
+
+
+synergy_player_all <- synergy_player_all%>%
+  filter(usg_pct >.18)%>%
+  arrange(-freq_dif)%>%
+  mutate(Rank = row_number())%>%
+  reframe(PLAYER_NAME,PLAY_TYPE,freq_dif)
+  #reframe(PLAYER_NAME,PLAY_TYPE,POSS_PCT.y,POSS_PCT.x,freq_dif)
+
+
+
+tab1 <- synergy_player_all %>%
+  dplyr::slice(1:10) 
+
+
+tab2 <- synergy_player_all %>%
+  dplyr::slice(925:934) 
+
+
+tab_combined <- data.frame(tab1,tab2)
+
+
+gt(tab_combined)%>%
+  gt_theme_538()%>%
+  #cols_hide(c(POSS_PCT.y.1)) %>% 
+  cols_label(PLAYER_NAME = "Player",
+             PLAY_TYPE = "Action",
+             POSS_PCT.y = "2023-24",
+             POSS_PCT.x = "2024-25",
+             freq_dif = "Freq Change",
+             PLAYER_NAME.1 = "Player",
+             PLAY_TYPE.1 = "Action",
+             POSS_PCT.y.1 = "2023-24",
+             POSS_PCT.x.1 = "2024-25",
+             freq_dif.1 = "Freq Change",)%>%
+  data_color(columns = c(freq_dif,freq_dif.1),
+             target_columns = c(freq_dif,freq_dif.1),
+             palette = c("red", "indianred1","white", "steelblue1", "blue"),
+             domain = c(-.215,.215))%>%
+  fmt_percent(columns = c(POSS_PCT.x,POSS_PCT.y,freq_dif,
+                          POSS_PCT.x.1,POSS_PCT.y.1,freq_dif.1),decimals = 1)%>%
+  gt_add_divider(freq_dif, color = 'black', include_labels = TRUE) %>%
+  # gt_add_divider(Rank, color = 'black', include_labels = FALSE) %>%
+  # gt_add_divider(Rank.1, color = 'black', include_labels = FALSE) %>%
+  gt::cols_align(columns = c(everything()),"center")%>%
+  #tab_spanner(columns = c(POSS_PCT.y,POSS_PCT.x,freq_dif),label = "Frequency")%>%
+  tab_source_note(source_note = "By Bucknell Analytics | Data: NBAr")%>%
+  tab_header(title = "Largest Differences in Play Type Usage", subtitle = "Compared to Last Season | Minimum 18% Usage Rate")%>%
+  opt_align_table_header("center")%>%
+  tab_footnote(locations = cells_column_labels(columns = c(freq_dif,freq_dif.1)),
+               footnote = "Change in Percentage of Possessions")
+
+
+
+gt(tab_combined)%>%
+  gt_theme_538()%>%
+  #cols_hide(c(POSS_PCT.y.1)) %>% 
+  cols_label(PLAYER_NAME = "Player",
+             PLAY_TYPE = "Action",
+             freq_dif = "Freq Change",
+             PLAYER_NAME.1 = "Player",
+             PLAY_TYPE.1 = "Action",
+             freq_dif.1 = "Freq Change",)%>%
+  data_color(columns = c(freq_dif,freq_dif.1),
+             target_columns = c(freq_dif,freq_dif.1),
+             palette = c("red", "indianred1","white", "steelblue1", "blue"),
+             domain = c(-.215,.215))%>%
+  fmt_percent(columns = c(freq_dif,freq_dif.1),decimals = 1)%>%
+  gt_add_divider(freq_dif, color = 'black', include_labels = TRUE) %>%
+  # gt_add_divider(Rank, color = 'black', include_labels = FALSE) %>%
+  # gt_add_divider(Rank.1, color = 'black', include_labels = FALSE) %>%
+  gt::cols_align(columns = c(everything()),"center")%>%
+  #tab_spanner(columns = c(POSS_PCT.y,POSS_PCT.x,freq_dif),label = "Frequency")%>%
+  tab_source_note(source_note = "By Bucknell Analytics | Data: NBAr")%>%
+  tab_header(title = "Largest Differences in Play Type Usage", subtitle = "Compared to Last Season | Minimum 18% Usage Rate")%>%
+  opt_align_table_header("center")%>%
+  tab_footnote(locations = cells_column_labels(columns = c(freq_dif,freq_dif.1)),
+               footnote = "Change in Percentage of Possessions")
+
+
