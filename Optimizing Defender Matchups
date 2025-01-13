@@ -1,0 +1,829 @@
+
+
+### Wingspan
+
+library(NBAr)
+
+wingspan_24 <- read.csv("NBA_Wingspan_24.csv", header = TRUE, sep = ",")
+
+
+
+library(stringr)
+
+wingspan_24[c('First', 'Last')] <- str_split_fixed(wingspan_24$Wingspan, "'", 2)
+
+wingspan <- wingspan_24%>%
+  mutate_at(c("First","Last"), as.numeric)%>%
+  mutate(Winspan.Inches = (First*12)+Last)%>%
+  reframe(Name,Height,Height.Inches,Wingspan,Winspan.Inches,Length)
+
+
+
+combine <- nba_draftcombineplayeranthro(
+  league_id = "00",
+  season_year = most_recent_nba_season() - 1)
+
+
+combine <- as.data.frame(combine)
+
+
+
+
+
+
+combined_wingspan <- data.frame()
+
+# Loop through each year
+for (year in 2000:2014) {
+  # Fetch data for the current year
+  data <- nba_draftcombineplayeranthro(
+    league_id = "00",
+    season_year = year_to_season(year)
+  )
+  
+  # Add a column for the year
+  data$year <- year
+  
+  # Append the data to the combined dataframe
+  combined_wingspan <- bind_rows(combined_wingspan, data)
+}
+
+
+
+
+combined_wingspan2 <- data.frame()
+
+# Loop through each year
+for (year2 in 2015:2024) {
+  # Fetch data for the current year
+  data2 <- nba_draftcombineplayeranthro(
+    league_id = "00",
+    season_year = year2
+  )
+  
+  # Add a column for the year
+  data2$year <- year2
+  
+  # Append the data to the combined dataframe
+  combined_wingspan2 <- bind_rows(combined_wingspan2, data2)
+}
+
+
+combined_wingspan_full <- bind_rows(combined_wingspan2, combined_wingspan)
+
+combined_wingspan_full2 <- cbind(combined_wingspan_full$Results, combined_wingspan_full["year"])
+
+
+
+add_NAs <- combined_wingspan_full2%>%
+  left_join(wingspan, by = c("PLAYER_NAME"="Name"), suffix = c("", ".new")) %>%
+  mutate_at(c("HEIGHT_WO_SHOES","WINGSPAN"), as.numeric)%>%
+  mutate(HEIGHT_WO_SHOES = ifelse(is.na(HEIGHT_WO_SHOES), Height.Inches,HEIGHT_WO_SHOES),
+         WINGSPAN = ifelse(is.na(WINGSPAN), Winspan.Inches,WINGSPAN),
+         LENGTH = WINGSPAN - HEIGHT_WO_SHOES)%>%
+  reframe(PLAYER_ID,PLAYER_NAME,POSITION,HEIGHT_WO_SHOES,WINGSPAN,LENGTH)%>%
+  distinct(PLAYER_ID,.keep_all = TRUE)
+
+update.packages("hoopR")
+library(hoopR)
+
+
+player_matchup24 <- nba_leagueseasonmatchups(season = year_to_season(2023),per_mode = "Totals",
+                                           season_type = "Regular Season")
+
+player_matchup24 <- as.data.frame(player_matchup24)
+
+
+player_matchup23 <- nba_leagueseasonmatchups(season = year_to_season(2022),per_mode = "Totals",
+                                             season_type = "Regular Season")
+
+player_matchup23 <- as.data.frame(player_matchup23)
+
+
+player_matchup22 <- nba_leagueseasonmatchups(season = year_to_season(2021),
+                                             season_type = "Regular Season")
+
+player_matchup22 <- as.data.frame(player_matchup22)
+
+
+player_matchup21 <- nba_leagueseasonmatchups(season = year_to_season(2020),
+                                             season_type = "Regular Season")
+
+player_matchup21 <- as.data.frame(player_matchup21)
+
+
+
+player_matchup_full <- rbind(player_matchup24,player_matchup23,player_matchup22,player_matchup21)
+
+
+player_matchup_full <- player_matchup_full %>%
+  rename_with(~str_remove(., 'SeasonMatchups.'))%>%
+  mutate_at(c("MATCHUP_FGA","MATCHUP_FGM","MATCHUP_TIME_SEC","PARTIAL_POSS","PLAYER_PTS",
+              "MATCHUP_TOV","MATCHUP_BLK","SFL"), as.numeric)
+
+
+regression_df <- player_matchup_full%>%
+  filter(PARTIAL_POSS > 50)%>%
+  mutate(Year = case_when(SEASON_ID == 22023 ~ 2024,
+                          SEASON_ID == 22022 ~ 2023,
+                          SEASON_ID == 22021 ~ 2022,
+                          SEASON_ID == 22020 ~ 2021))%>%
+  mutate(PPP = PLAYER_PTS/PARTIAL_POSS,
+         fga_per = MATCHUP_FGA/PARTIAL_POSS,
+         fgm_per = MATCHUP_FGM/PARTIAL_POSS,
+         tov_per = MATCHUP_TOV/PARTIAL_POSS,
+         blk_per = MATCHUP_BLK/PARTIAL_POSS,
+         sfl_per = SFL/PARTIAL_POSS,
+         fg_pct = MATCHUP_FGM/MATCHUP_FGA)%>%
+  mutate_at(c("PPP","fga_per",                                                
+              "fgm_per",  "blk_per", "tov_per",          
+              "sfl_per","fg_pct"), ~(scale(.)))
+
+#game_score = pts + .4*FGM - .7*FGA - .4*(fta-ftm) + .7*oreb +.3*dreb+ stl+.7*ast + .7*blk -.4*pf-tov)%>%
+
+
+model <- lm(PPP ~ tov_per + blk_per + sfl_per + fg_pct, data = regression_df)
+
+
+#model <- lm(PPP ~ MATCHUP_TOV + MATCHUP_BLK + SFL + fg_pct, data = regression_df)
+
+
+
+options(scipen = 999)
+# View weights
+coeffs <- as.data.frame(summary(model)$coefficients)
+
+library(car)
+
+
+summary(model)
+
+vip(model)
+vif(model)
+
+
+matchup_impact <- regression_df%>%
+  # mutate(matchup_impact_score = 0.0000000000000002253 + PPP + (0.0544 * fga_per) + 
+  #          (0.84985 * fgm_per) - (0.008697 * tov_per) + 	
+  #          (-0.042 * blk_per) - (0.22572 * sfl_per))%>%
+  # mutate(matchup_impact_score = PPP - (0.7 * fga_per) + 
+  #          (0.4 * fgm_per) - (tov_per) - 	
+  #          (0.7 * blk_per) + (0.6 * sfl_per))%>%
+  # mutate(matchup_impact_score = (PLAYER_PTS - (0.7 *  MATCHUP_FGA) + 
+  #          (0.4 *  MATCHUP_FGM) - (MATCHUP_TOV) - 	
+  #          (0.7 * MATCHUP_BLK) + (0.6 * SFL))/PARTIAL_POSS)%>%
+  mutate(matchup_impact_score = 0.001275 + PPP+ (0.402500 * fg_pct) + (0.134609 * tov_per) +
+           (0.103109 * blk_per) + (0.409438 * sfl_per))%>%
+  reframe(Year, OFF_PLAYER_ID,OFF_PLAYER_NAME,DEF_PLAYER_ID, DEF_PLAYER_NAME, MATCHUP_MIN, PARTIAL_POSS,
+          PLAYER_PTS,MATCHUP_FGM,MATCHUP_FGA,SFL,
+          PPP, fga_per, fgm_per, tov_per, blk_per, sfl_per, matchup_impact_score)%>%
+  arrange(matchup_impact_score)
+
+matchup_impact <- matchup_impact[!duplicated(matchup_impact), ]
+
+
+
+
+
+
+
+
+
+### Shot Locations by Year
+
+individual_shot_detail24 <- nba_shotchartdetail(league_id = '00', player_id = '0', 
+                                              season = "2023-24")
+
+player_shot_detail24 <- as.data.frame(individual_shot_detail24[[1]])
+
+player_shot_detail24 <- player_shot_detail24%>%
+  mutate(Year = 2024)
+
+
+
+individual_shot_detail23 <- nba_shotchartdetail(league_id = '00', player_id = '0', 
+                                                season = "2022-23")
+
+player_shot_detail23 <- as.data.frame(individual_shot_detail23[[1]])
+
+player_shot_detail23 <- player_shot_detail23%>%
+  mutate(Year = 2023)
+
+
+
+individual_shot_detail22 <- nba_shotchartdetail(league_id = '00', player_id = '0', 
+                                                season = "2021-22")
+
+player_shot_detail22 <- as.data.frame(individual_shot_detail22[[1]])
+
+player_shot_detail22 <- player_shot_detail22%>%
+  mutate(Year = 2022)
+
+
+
+
+individual_shot_detail21 <- nba_shotchartdetail(league_id = '00', player_id = '0', 
+                                                season = "2020-21")
+
+player_shot_detail21 <- as.data.frame(individual_shot_detail21[[1]])
+
+player_shot_detail21 <- player_shot_detail21%>%
+  mutate(Year = 2021)
+
+
+
+player_shot_detail_full <- rbind(player_shot_detail24,player_shot_detail23,player_shot_detail22,player_shot_detail21)
+
+
+# 
+# player_shot_chart_freq_data <- player_shot_detail_full%>%
+#   mutate(final_zone = case_when(
+#     SHOT_ZONE_BASIC == "Above the Break 3" & SHOT_ZONE_AREA == "Left Side Center(LC)" ~ "Left Side Above the Break 3",
+#     SHOT_ZONE_BASIC == "Above the Break 3" & SHOT_ZONE_AREA == "Right Side Center(RC)" ~ "Right Side Above the Break 3",
+#     SHOT_ZONE_BASIC == "Above the Break 3" & SHOT_ZONE_AREA == "Center(C)" ~ "Center Above the Break 3",
+#     SHOT_ZONE_BASIC == "Right Corner 3" ~ "Right Corner 3",
+#     SHOT_ZONE_BASIC == "Left Corner 3" ~ "Left Corner 3",
+#     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Left Side(L)" ~ "Left Side Mid-Range",
+#     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Left Side Center(LC)" ~ "Left Side Center Mid-Range",
+#     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Center(C)" ~ "Center Mid-Range",
+#     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Right Side Center(RC)" ~ "Right Side Center Mid-Range",
+#     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Right Side(R)" ~ "Right Side Mid-Range",
+#     SHOT_ZONE_BASIC == "Restricted Area" |  (SHOT_ZONE_BASIC == "In The Paint (Non-RA)" & SHOT_ZONE_RANGE == "Less Than 8 ft.") ~ "Rim",
+#     SHOT_ZONE_BASIC == "In The Paint (Non-RA)" & SHOT_ZONE_RANGE != "Less Than 8 ft." ~ "Paint",
+#     TRUE ~ player_shot_detail_full$SHOT_ZONE_BASIC),
+#     points = case_when(
+#       SHOT_TYPE == "2PT Field Goal" & SHOT_MADE_FLAG == "1" ~ 2,
+#       SHOT_TYPE == "3PT Field Goal" & SHOT_MADE_FLAG == "1" ~ 3,
+#       TRUE ~ 0))%>%
+#   group_by(PLAYER_ID,Year)%>%
+#   mutate(total_overall_shots = n())%>%
+#   ungroup()%>%
+#   group_by(PLAYER_ID,Year,final_zone)%>%
+#   mutate(frequency = n()/total_overall_shots,
+#          pps = round(sum(points)/n(),2))%>%
+#   reframe(Year,PLAYER_ID,PLAYER_NAME,final_zone, frequency, pps)%>%
+#   distinct(PLAYER_ID,Year,final_zone,.keep_all = TRUE)
+# 
+# 
+
+
+
+player_bar <- player_shot_detail_full%>%
+  mutate(shot_type = case_when(SHOT_ZONE_BASIC == "Restricted Area" ~ "Rim",
+                               SHOT_ZONE_BASIC == "In The Paint (Non-RA)" |
+                                 (SHOT_ZONE_BASIC == "Mid-Range" &
+                                    SHOT_ZONE_RANGE == "8-16 ft.") ~ "Short_Mid",
+                               SHOT_ZONE_RANGE == "16-24 ft." & 
+                                 SHOT_TYPE != "3PT Field Goal" ~ "Long_Mid",
+                               SHOT_TYPE == "3PT Field Goal" ~ "3P"))%>%
+  mutate_at(c("SHOT_MADE_FLAG","SHOT_ATTEMPTED_FLAG"), as.numeric)%>%
+  group_by(PLAYER_ID,Year)%>%
+  mutate(total_overall_shots = n())%>%
+  ungroup()%>%
+  group_by(PLAYER_ID, Year, shot_type)%>%
+  mutate(frequency = n()/total_overall_shots,
+         fg_pct = sum(SHOT_MADE_FLAG) / sum(SHOT_ATTEMPTED_FLAG))%>%
+  ungroup()%>%
+  reframe(PLAYER_ID,Year,PLAYER_NAME,shot_type,frequency ,fg_pct)%>%
+  distinct(PLAYER_ID,Year,shot_type,.keep_all = TRUE)
+
+
+
+player_shooting_longer <- player_bar%>%
+  pivot_wider(names_from = "shot_type",values_from = c("fg_pct","frequency"))
+
+
+
+
+
+with_shooting <- left_join(matchup_impact,player_shooting_longer, by = c("OFF_PLAYER_ID" = "PLAYER_ID",
+                                                                         "Year"))
+
+off_player <- add_NAs%>%
+  reframe(PLAYER_ID,HEIGHT_WO_SHOES)
+
+
+def_player <- add_NAs%>%
+  reframe(PLAYER_ID,HEIGHT_WO_SHOES,WINGSPAN,LENGTH)
+
+with_off_height <- left_join(with_shooting,off_player, by = c("OFF_PLAYER_ID" = "PLAYER_ID"))
+
+
+with_all_height <- left_join(with_off_height,def_player, by = c("DEF_PLAYER_ID" = "PLAYER_ID"))
+
+
+
+
+## Add Players who didn't test at Combine
+
+missing_wingspan <- with_all_height%>%
+  filter(is.na(HEIGHT_WO_SHOES.x))%>%
+  distinct(OFF_PLAYER_ID,.keep_all = TRUE)%>%
+  reframe(OFF_PLAYER_NAME)
+
+
+missing_wingspan <- left_join(missing_wingspan,wingspan, by = c("OFF_PLAYER_NAME" = "Name"))
+
+missing_wingspan <- missing_wingspan%>%
+  filter(!is.na(Wingspan))
+  # rename("PLAYER_NAME" = "OFF_PLAYER_NAME",
+  #        "HEIGHT_WO_SHOES" = "Height.Inches",
+  #        "WINGSPAN" = "Wingspan.Inches",
+  #        "LENGTH" = "Length")%>%
+
+
+
+off_player2 <- missing_wingspan%>%
+  reframe(OFF_PLAYER_NAME,Height.Inches)
+  #rename("Height.Inches.Off" = "Height.Inches")
+
+
+def_player2 <- missing_wingspan%>%
+  reframe(OFF_PLAYER_NAME,Height.Inches,Winspan.Inches,Length)
+
+
+add_missing <- left_join(with_all_height,off_player2, by = c("OFF_PLAYER_NAME" = "OFF_PLAYER_NAME"))
+
+add_missing <- left_join(add_missing,def_player2, by = c("DEF_PLAYER_NAME" = "OFF_PLAYER_NAME"))
+
+
+
+
+
+
+total_wingspan <- add_missing%>%
+  mutate(HEIGHT_WO_SHOES.x = ifelse(is.na(HEIGHT_WO_SHOES.x), Height.Inches.x,HEIGHT_WO_SHOES.x),
+         HEIGHT_WO_SHOES.y = ifelse(is.na(HEIGHT_WO_SHOES.y), Height.Inches.y,HEIGHT_WO_SHOES.y),
+         WINGSPAN = ifelse(is.na(WINGSPAN), Winspan.Inches,WINGSPAN),
+         LENGTH = ifelse(is.na(LENGTH), Length,LENGTH))%>%
+  filter(!is.na(c(HEIGHT_WO_SHOES.x)))%>%
+  filter(!is.na(c(HEIGHT_WO_SHOES.y)))%>%
+  select(-Winspan.Inches,-Height.Inches.x,-Height.Inches.y,-Length,-fg_pct_NA,-frequency_NA)
+
+
+total_wingspan[is.na(total_wingspan)] <- 0
+
+model_data <- total_wingspan%>%
+  select(-sfl_per,-blk_per,-tov_per,-fgm_per,-fga_per,-PPP,-SFL,-MATCHUP_FGA,-MATCHUP_FGM,
+         -PLAYER_PTS,-PARTIAL_POSS,-MATCHUP_MIN,-DEF_PLAYER_ID,-DEF_PLAYER_NAME,-OFF_PLAYER_ID,
+         -OFF_PLAYER_NAME,-Year,-PLAYER_NAME)
+
+
+model_data_join <- total_wingspan%>%
+  select(-sfl_per,-blk_per,-tov_per,-fgm_per,-fga_per,-PPP,-SFL,-MATCHUP_FGA,-MATCHUP_FGM,
+         -PLAYER_PTS,-PARTIAL_POSS,-MATCHUP_MIN)
+
+str(model_data)
+
+
+
+# Making train and test datasets
+smp_size <- floor(0.75 * nrow(model_data))
+set.seed(2011) #go lions
+ind <- sample(seq_len(nrow(model_data)), size = smp_size)
+train <- as.matrix(model_data[ind, ])
+test <- as.matrix(model_data[-ind, ])
+
+dim(train)
+colnames(train)
+
+# Making the model
+defending_model <-
+  xgboost(
+    data = train[, 2:13],
+    label = train[, 1],
+    nrounds = 5000,
+    objective = "reg:squarederror",
+    early_stopping_rounds = 3,
+    max_depth = 6,
+    eta = .25
+  )   
+
+
+vip(defending_model)
+
+grid <- expand.grid(
+  nrounds = c(1000, 2000, 3000),
+  max_depth = c(4, 6, 8),
+  eta = c(0.05, 0.1, 0.25),
+  gamma = 0, 
+  colsample_bytree = 0.8,
+  min_child_weight = 1,
+  subsample = 0.8
+)
+
+# TrainControl for Cross-Validation
+control <- trainControl(method = "cv", number = 5)
+
+# Train the Model
+tuned_model <- train(
+  x = train[, 2:13],
+  y = train[, 1],
+  method = "xgbTree",
+  tuneGrid = grid,
+  trControl = control,
+  verbose = FALSE
+)
+
+# Best Model
+best_model <- tuned_model$finalModel
+
+
+
+
+library(ranger)
+library(vip)
+library(caret)
+
+pred_xgb <- predict(defending_model, test[, 2:13])
+
+# Seeing our RMSE
+yhat <- pred_xgb
+y <- test[, 1]
+postResample(yhat, y)
+
+defending_preds <- as.data.frame(
+  matrix(predict(defending_model, as.matrix(model_data %>% select(-matchup_impact_score))))
+) %>%
+  dplyr::rename(exp_matchup_impact_score = V1)
+
+defending_projs <- cbind(model_data_join, defending_preds)
+
+
+
+
+
+
+
+all_defenders <- defending_projs%>%
+  reframe(DEF_PLAYER_ID, DEF_PLAYER_NAME, HEIGHT_WO_SHOES.y,WINGSPAN,LENGTH)%>%
+  distinct(DEF_PLAYER_ID)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#### OPTIMIZATION MODEL FINAL
+
+
+library(rBayesianOptimization)
+
+
+# Define the objective function for Bayesian optimization
+optimize_player_measurements <- function(HEIGHT_WO_SHOES.y, WINGSPAN) {
+  # Create a temporary dataframe with all required features
+  temp_player <- player_row  # Start with all original player features
+  
+  # Update only the measurements we're optimizing
+  temp_player$HEIGHT_WO_SHOES.y <- HEIGHT_WO_SHOES.y[1]  # Take first value if multiple
+  temp_player$WINGSPAN <- WINGSPAN[1]  # Take first value if multiple
+  
+  # Extract only the features the model expects
+  pred_matrix <- as.matrix(temp_player[, defending_model$feature_names])
+  
+  # Create DMatrix object
+  dpred <- xgb.DMatrix(pred_matrix)
+  
+  # Predict matchup impact score using the existing model
+  predicted_impact <- predict(defending_model, dpred)[1]  # Take first prediction if multiple
+  
+  # Return negative score since we want to minimize impact
+  return(list(Score = -predicted_impact, Pred = 0))
+}
+
+optimize_measurements_for_player <- function(player_data) {
+  # Define bounds for height and wingspan
+  bounds <- list(
+    HEIGHT_WO_SHOES.y = c(70, 85),  # Height in inches (5'10" to 7'1")
+    WINGSPAN = c(70, 90)            # Wingspan in inches (5'10" to 7'6")
+  )
+  
+  # Set optimization parameters
+  bayes_settings <- list(
+    n_iter = 50,
+    init_points = 10,
+    acq = "ucb",
+    kappa = 2.576,
+    eps = 0.0
+  )
+  
+  tryCatch({
+    # Run Bayesian optimization
+    opt_results <- BayesianOptimization(
+      FUN = optimize_player_measurements,
+      bounds = bounds,
+      init_points = bayes_settings$init_points,
+      n_iter = bayes_settings$n_iter,
+      acq = bayes_settings$acq,
+      kappa = bayes_settings$kappa,
+      eps = bayes_settings$eps
+    )
+    
+    # Extract optimal measurements
+    optimal_height <- opt_results$Best_Par[["HEIGHT_WO_SHOES.y"]]
+    optimal_wingspan <- opt_results$Best_Par[["WINGSPAN"]]
+    expected_impact <- -opt_results$Best_Value
+    
+    return(list(
+      optimal_height = optimal_height,
+      optimal_wingspan = optimal_wingspan,
+      expected_impact = expected_impact,
+      full_results = opt_results
+    ))
+  }, error = function(e) {
+    print(paste("Error in optimization:", e$message))
+    return(NULL)
+  })
+}
+
+analyze_player <- function(player_row) {
+  # Get current measurements
+  current_height <- player_row$HEIGHT_WO_SHOES.y[1]  # Take first value if multiple
+  current_wingspan <- player_row$WINGSPAN[1]  # Take first value if multiple
+  
+  # Create matrix for current player prediction
+  current_matrix <- as.matrix(player_row[, defending_model$feature_names])
+  current_dmatrix <- xgb.DMatrix(current_matrix)
+  current_impact <- predict(defending_model, current_dmatrix)[1]  # Take first prediction if multiple
+  
+  # Run optimization
+  optimization_results <- optimize_measurements_for_player(player_row)
+  
+  if (is.null(optimization_results)) {
+    cat("Optimization failed. Please check the input data and try again.\n")
+    return(NULL)
+  }
+  # 
+  # # Calculate improvement
+  # improvement <- current_impact - optimization_results$expected_impact
+  # 
+  # # Print results
+  # cat(sprintf("\nPlayer: %s\n", player_row$OFF_PLAYER_NAME[1]))
+  # cat(sprintf("\nCurrent Measurements:\n"))
+  # cat(sprintf("Height: %.1f inches (%.1f'%.1f\")\n", 
+  #             current_height, 
+  #             floor(current_height/12), 
+  #             current_height %% 12))
+  # cat(sprintf("Wingspan: %.1f inches (%.1f'%.1f\")\n", 
+  #             current_wingspan,
+  #             floor(current_wingspan/12), 
+  #             current_wingspan %% 12))
+  # cat(sprintf("Current Impact Score: %.3f\n\n", current_impact))
+  # 
+  # cat(sprintf("Optimal Measurements:\n"))
+  # cat(sprintf("Height: %.1f inches (%.1f'%.1f\")\n", 
+  #             optimization_results$optimal_height,
+  #             floor(optimization_results$optimal_height/12),
+  #             optimization_results$optimal_height %% 12))
+  # cat(sprintf("Wingspan: %.1f inches (%.1f'%.1f\")\n",
+  #             optimization_results$optimal_wingspan,
+  #             floor(optimization_results$optimal_wingspan/12),
+  #             optimization_results$optimal_wingspan %% 12))
+  # cat(sprintf("Optimized Impact Score: %.3f\n", optimization_results$expected_impact))
+  # cat(sprintf("Potential Improvement: %.3f\n", improvement))
+  # return(optimization_results)
+  
+  
+  # Create comparison dataframe
+  comparison_df <- data.frame(
+    offensive_player = player_row$OFF_PLAYER_NAME[1],
+    defensive_player = player_row$DEF_PLAYER_NAME[1],
+    off_height = current_height,
+    off_height_ft = paste(floor(current_height/12), round(current_height %% 12, 1), sep="'"),
+    off_wingspan = current_wingspan,
+    off_wingspan_ft = paste(floor(current_wingspan/12), round(current_wingspan %% 12, 1), sep="'"),
+    current_def_height = current_def_height,
+    current_def_height_ft = paste(floor(current_def_height/12), round(current_def_height %% 12, 1), sep="'"),
+    current_def_wingspan = current_def_wingspan,
+    current_def_wingspan_ft = paste(floor(current_def_wingspan/12), round(current_def_wingspan %% 12, 1), sep="'"),
+    optimal_def_height = optimization_results$optimal_height,
+    optimal_def_height_ft = paste(floor(optimization_results$optimal_height/12), 
+                                  round(optimization_results$optimal_height %% 12, 1), sep="'"),
+    optimal_def_wingspan = optimization_results$optimal_wingspan,
+    optimal_def_wingspan_ft = paste(floor(optimization_results$optimal_wingspan/12), 
+                                    round(optimization_results$optimal_wingspan %% 12, 1), sep="'"),
+    current_impact_score = current_impact,
+    optimal_impact_score = optimization_results$expected_impact,
+    improvement = current_impact - optimization_results$expected_impact
+  )
+  return(comparison_df)
+}
+# 
+# player_row <- defending_projs%>%
+#   filter(OFF_PLAYER_NAME == "Jayson Tatum")
+#   
+# results <- analyze_player(player_row)
+
+
+
+
+
+
+
+
+
+
+### Optimizer Model
+
+
+# Helper function to find closest defender
+find_closest_defender <- function(optimal_height, optimal_wingspan, all_defenders) {
+  # Calculate Euclidean distance between optimal measurements and all defenders
+  all_defenders$distance <- sqrt(
+    (all_defenders$HEIGHT_WO_SHOES.y - optimal_height)^2 + 
+      (all_defenders$WINGSPAN - optimal_wingspan)^2
+  )
+  
+  # Find the defender with minimum distance
+  closest_defender <- all_defenders[which.min(all_defenders$distance), ]
+  
+  return(closest_defender)
+}
+
+# Main optimization and analysis functions remain the same until the analyze_player function
+analyze_player <- function(player_row, all_defenders) {
+  # Get current measurements
+  current_height <- player_row$HEIGHT_WO_SHOES.x[1]  # Offensive player height
+  current_wingspan <- player_row$WINGSPAN[1]         # Offensive player wingspan
+  current_def_height <- player_row$HEIGHT_WO_SHOES.y[1]  # Current defender height
+  current_def_wingspan <- player_row$LENGTH[1]           # Current defender wingspan
+  
+  # Create matrix for current player prediction
+  current_matrix <- as.matrix(player_row[, defending_model$feature_names])
+  current_dmatrix <- xgb.DMatrix(current_matrix)
+  current_impact <- predict(defending_model, current_dmatrix)[1]
+  
+  # Run optimization
+  optimization_results <- optimize_measurements_for_player(player_row)
+  
+  if (is.null(optimization_results)) {
+    return(NULL)
+  }
+  
+  # Find closest real defender
+  closest_defender <- find_closest_defender(
+    optimization_results$optimal_height,
+    optimization_results$optimal_wingspan,
+    all_defenders
+  )
+  
+  # Create comparison dataframe
+  comparison_df <- data.frame(
+    offensive_player = player_row$OFF_PLAYER_NAME[1],
+    defensive_player = player_row$DEF_PLAYER_NAME[1],
+    off_height = current_height,
+    off_height_ft = paste(floor(current_height/12), round(current_height %% 12, 1), sep="'"),
+    off_wingspan = current_wingspan,
+    off_wingspan_ft = paste(floor(current_wingspan/12), round(current_wingspan %% 12, 1), sep="'"),
+    current_def_height = current_def_height,
+    current_def_height_ft = paste(floor(current_def_height/12), round(current_def_height %% 12, 1), sep="'"),
+    current_def_wingspan = current_def_wingspan,
+    current_def_wingspan_ft = paste(floor(current_def_wingspan/12), round(current_def_wingspan %% 12, 1), sep="'"),
+    optimal_def_height = optimization_results$optimal_height,
+    optimal_def_height_ft = paste(floor(optimization_results$optimal_height/12), 
+                                  round(optimization_results$optimal_height %% 12, 1), sep="'"),
+    optimal_def_wingspan = optimization_results$optimal_wingspan,
+    optimal_def_wingspan_ft = paste(floor(optimization_results$optimal_wingspan/12), 
+                                    round(optimization_results$optimal_wingspan %% 12, 1), sep="'"),
+    best_matching_defender = closest_defender$DEF_PLAYER_NAME,
+    matching_def_height = closest_defender$HEIGHT_WO_SHOES.y,
+    matching_def_height_ft = paste(floor(closest_defender$HEIGHT_WO_SHOES.y/12), 
+                                   round(closest_defender$HEIGHT_WO_SHOES.y %% 12, 1), sep="'"),
+    matching_def_wingspan = closest_defender$WINGSPAN,
+    matching_def_wingspan_ft = paste(floor(closest_defender$WINGSPAN/12), 
+                                     round(closest_defender$WINGSPAN %% 12, 1), sep="'"),
+    measurement_difference = closest_defender$distance,
+    current_impact_score = current_impact,
+    optimal_impact_score = optimization_results$expected_impact,
+    improvement = current_impact - optimization_results$expected_impact
+  )
+  
+  return(comparison_df)
+}
+
+# 1. Filter for your player
+player_row <- defending_projs %>%
+  filter(OFF_PLAYER_NAME == "DeMar DeRozan")
+
+# 2. Run the analysis with the all_defenders dataframe
+results_df <- analyze_player(player_row, all_defenders)
+
+# 3. View the results
+print(results_df)
+
+
+
+logos <- hoopR::load_nba_player_box(2025)%>%
+  reframe(athlete_display_name,athlete_headshot_href,team_logo)
+
+
+logos <- logos[!duplicated(logos$athlete_display_name), ]
+
+
+results_df <- left_join(results_df,logos, by = c("offensive_player" = "athlete_display_name"))
+
+results_df <- left_join(results_df,logos, by = c("best_matching_defender" = "athlete_display_name"))
+
+optimal_table <- results_df%>%
+  reframe(offensive_player,athlete_headshot_href.x,optimal_def_height_ft,optimal_def_wingspan_ft,
+          best_matching_defender,athlete_headshot_href.y,matching_def_height_ft,matching_def_wingspan_ft,
+          optimal_impact_score)
+
+
+optimal_table%>%
+  gt()%>%
+  gt_theme_538()%>%
+  gtExtras::gt_img_rows(athlete_headshot_href.x)%>%
+  gtExtras::gt_img_rows(athlete_headshot_href.y)%>%
+  data_color(columns = c(optimal_impact_score),
+             target_columns = c(optimal_impact_score),
+             palette = c("red", "indianred1","white", "steelblue1","blue"),
+             domain = c(-4,5))%>%
+  cols_label(offensive_player = "Offensive Player",
+             athlete_headshot_href.x = "",
+             best_matching_defender = "Closest Defender Matchup",
+             athlete_headshot_href.y = "",
+             optimal_def_height_ft = "Optimal Defender Height",
+             optimal_def_wingspan_ft = "Optimal Defender Wingspan",
+             matching_def_height_ft = "Closest Defender Height",
+             matching_def_wingspan_ft = "Closest Defender Wingspan",
+             optimal_impact_score = "Predicted Matchup Impact Score")%>%
+  fmt_number(columns = c(optimal_impact_score),decimals = 2)%>%
+  gt_add_divider(optimal_def_wingspan_ft, color = 'black', include_labels = FALSE) %>%
+  gt::cols_align(columns = c(everything()),"center")%>%
+  tab_header(title = "Optimal Defender's Physical Measurements",subtitle = "Trae Young")%>%
+  tab_source_note(source_note = "By Bucknell Analytics | Data: hoopR & NBAr")%>%
+  opt_align_table_header("center")%>%
+  tab_footnote(locations = cells_column_labels(columns = c(poss_battle,poss_battle.1)),
+               footnote = "(OREB + (FTA * .44) - TOV) - (Opp OREB + (Opp FTA * .44) - Opp TOV)")
+
+
+
+
+
+
+
+
+defender_hex <- defending_projs%>%
+  filter(OFF_PLAYER_NAME == "Trae Young")%>%
+
+
+
+
+# First, create averaged dataset
+avg_predictions <- defender_hex %>%
+  group_by(HEIGHT_WO_SHOES.y, WINGSPAN) %>%
+  summarize(avg_impact = mean(exp_matchup_impact_score), .groups = 'drop')
+
+summary(avg_predictions)
+
+
+
+
+ggplot(avg_predictions, aes(x = HEIGHT_WO_SHOES.y, y = WINGSPAN)) +
+  #geom_contour_filled(aes(z = avg_impact))
+  stat_summary_hex(aes(z = avg_impact), bins = 6, fun = mean) +
+  scale_fill_viridis_c(direction = -1,option = "magma",name = "Avg Matchup\nImpact Score") +
+  labs(
+    title = "Average Defensive Matchup Impact Score by Height and Wingspan",
+    subtitle = "Trae Young",
+    x = "Defender Height (inches)",
+    y = "Defender Wingspan (inches)",
+    caption = "By: Bucknell Analytics | Data: NBAr + hoopR") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 28, hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(size = 20, hjust = 0.5),
+    plot.caption = element_text(size = 14),
+    axis.title.x = element_text(size=18),
+    axis.title.y = element_text(size=18),
+    axis.text = element_text(size = 16),
+    strip.text = element_text(size = 16, face = "bold"),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)) +
+  scale_x_continuous(
+    limits = c(71,84),
+    name = "Defender Height (ft)", 
+    breaks = seq(72, 86, by = 2), # Define major ticks (in inches)
+    labels = function(x) sprintf("%.1f", x / 12) ) +
+  scale_y_continuous(
+    name = "Defender Wingspan (ft)", 
+    breaks = seq(72, 88, by = 2), # Define major ticks (in inches)
+    labels = function(x) sprintf("%.1f", x / 12)) 
+ 
+  
+  
+
+
+
