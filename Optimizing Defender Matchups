@@ -4,32 +4,10 @@
 
 library(NBAr)
 
-wingspan_24 <- read.csv("NBA_Wingspan_24.csv", header = TRUE, sep = ",")
 
 
 
-library(stringr)
-
-wingspan_24[c('First', 'Last')] <- str_split_fixed(wingspan_24$Wingspan, "'", 2)
-
-wingspan <- wingspan_24%>%
-  mutate_at(c("First","Last"), as.numeric)%>%
-  mutate(Winspan.Inches = (First*12)+Last)%>%
-  reframe(Name,Height,Height.Inches,Wingspan,Winspan.Inches,Length)
-
-
-
-combine <- nba_draftcombineplayeranthro(
-  league_id = "00",
-  season_year = most_recent_nba_season() - 1)
-
-
-combine <- as.data.frame(combine)
-
-
-
-
-
+## NBA Combine Physical Measurements
 
 combined_wingspan <- data.frame()
 
@@ -75,6 +53,24 @@ combined_wingspan_full2 <- cbind(combined_wingspan_full$Results, combined_wingsp
 
 
 
+
+
+
+## CraftedNBA Wingspan Data
+wingspan_24 <- read.csv("NBA_Wingspan_24.csv", header = TRUE, sep = ",")
+
+library(stringr)
+
+wingspan_24[c('First', 'Last')] <- str_split_fixed(wingspan_24$Wingspan, "'", 2)
+
+wingspan <- wingspan_24%>%
+  mutate_at(c("First","Last"), as.numeric)%>%
+  mutate(Winspan.Inches = (First*12)+Last)%>%
+  reframe(Name,Height,Height.Inches,Wingspan,Winspan.Inches,Length)
+
+
+
+
 add_NAs <- combined_wingspan_full2%>%
   left_join(wingspan, by = c("PLAYER_NAME"="Name"), suffix = c("", ".new")) %>%
   mutate_at(c("HEIGHT_WO_SHOES","WINGSPAN"), as.numeric)%>%
@@ -84,9 +80,10 @@ add_NAs <- combined_wingspan_full2%>%
   reframe(PLAYER_ID,PLAYER_NAME,POSITION,HEIGHT_WO_SHOES,WINGSPAN,LENGTH)%>%
   distinct(PLAYER_ID,.keep_all = TRUE)
 
-update.packages("hoopR")
-library(hoopR)
 
+
+
+## Load in Matchup Data
 
 player_matchup24 <- nba_leagueseasonmatchups(season = year_to_season(2023),per_mode = "Totals",
                                            season_type = "Regular Season")
@@ -111,9 +108,14 @@ player_matchup21 <- nba_leagueseasonmatchups(season = year_to_season(2020),
 
 player_matchup21 <- as.data.frame(player_matchup21)
 
+player_matchup20 <- nba_leagueseasonmatchups(season = year_to_season(2019),
+                                             season_type = "Regular Season")
+
+player_matchup20 <- as.data.frame(player_matchup20)
 
 
-player_matchup_full <- rbind(player_matchup24,player_matchup23,player_matchup22,player_matchup21)
+
+player_matchup_full <- rbind(player_matchup24,player_matchup23,player_matchup22,player_matchup21,player_matchup20)
 
 
 player_matchup_full <- player_matchup_full %>%
@@ -127,6 +129,7 @@ regression_df <- player_matchup_full%>%
   mutate(Year = case_when(SEASON_ID == 22023 ~ 2024,
                           SEASON_ID == 22022 ~ 2023,
                           SEASON_ID == 22021 ~ 2022,
+                          SEASON_ID == 22020 ~ 2021,
                           SEASON_ID == 22020 ~ 2021))%>%
   mutate(PPP = PLAYER_PTS/PARTIAL_POSS,
          fga_per = MATCHUP_FGA/PARTIAL_POSS,
@@ -143,11 +146,9 @@ regression_df <- player_matchup_full%>%
 model <- lm(PPP ~ tov_per + blk_per + sfl_per + fg_pct, data = regression_df)
 
 
-#model <- lm(PPP ~ MATCHUP_TOV + MATCHUP_BLK + SFL + fg_pct, data = regression_df)
-
-
 
 options(scipen = 999)
+
 # View weights
 coeffs <- as.data.frame(summary(model)$coefficients)
 
@@ -155,7 +156,6 @@ library(car)
 
 
 summary(model)
-
 vip(model)
 vif(model)
 
@@ -283,11 +283,7 @@ missing_wingspan <- left_join(missing_wingspan,wingspan, by = c("OFF_PLAYER_NAME
 
 missing_wingspan <- missing_wingspan%>%
   filter(!is.na(Wingspan))
-  # rename("PLAYER_NAME" = "OFF_PLAYER_NAME",
-  #        "HEIGHT_WO_SHOES" = "Height.Inches",
-  #        "WINGSPAN" = "Wingspan.Inches",
-  #        "LENGTH" = "Length")%>%
-
+ 
 
 
 off_player2 <- missing_wingspan%>%
@@ -330,6 +326,11 @@ model_data_join <- total_wingspan%>%
   select(-sfl_per,-blk_per,-tov_per,-fgm_per,-fga_per,-PPP,-SFL,-MATCHUP_FGA,-MATCHUP_FGM,
          -PLAYER_PTS,-PARTIAL_POSS,-MATCHUP_MIN)
 
+
+
+
+
+### XGBOOST Model
 
 
 
@@ -537,7 +538,7 @@ analyze_player <- function(player_row) {
 
 
 
-### Optimizer Model
+### Closest Defender Function
 
 
 # Helper function to find closest defender
@@ -680,20 +681,15 @@ optimal_table%>%
 
 
 
+## Hex Plot
 
 
-defender_hex <- defending_projs%>%
-  filter(OFF_PLAYER_NAME == "Trae Young")%>%
-
-
-
-
-# First, create averaged dataset
-avg_predictions <- defender_hex %>%
+avg_predictions <- defending_projs %>%
+filter(OFF_PLAYER_NAME == "Trae Young")%>%
   group_by(HEIGHT_WO_SHOES.y, WINGSPAN) %>%
   summarize(avg_impact = mean(exp_matchup_impact_score), .groups = 'drop')
 
-summary(avg_predictions)
+
 
 
 
@@ -705,8 +701,6 @@ ggplot(avg_predictions, aes(x = HEIGHT_WO_SHOES.y, y = WINGSPAN)) +
   labs(
     title = "Average Defensive Matchup Impact Score by Height and Wingspan",
     subtitle = "Trae Young",
-    x = "Defender Height (inches)",
-    y = "Defender Wingspan (inches)",
     caption = "By: Bucknell Analytics | Data: NBAr + hoopR") +
   theme_minimal() +
   theme(
