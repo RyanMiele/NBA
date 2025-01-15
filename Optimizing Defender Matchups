@@ -123,7 +123,7 @@ player_matchup_full <- player_matchup_full %>%
 
 
 regression_df <- player_matchup_full%>%
-  filter(PARTIAL_POSS > 50)%>%
+  filter(PARTIAL_POSS > 25)%>%
   mutate(Year = case_when(SEASON_ID == 22023 ~ 2024,
                           SEASON_ID == 22022 ~ 2023,
                           SEASON_ID == 22021 ~ 2022,
@@ -138,8 +138,6 @@ regression_df <- player_matchup_full%>%
   mutate_at(c("PPP","fga_per",                                                
               "fgm_per",  "blk_per", "tov_per",          
               "sfl_per","fg_pct"), ~(scale(.)))
-
-#game_score = pts + .4*FGM - .7*FGA - .4*(fta-ftm) + .7*oreb +.3*dreb+ stl+.7*ast + .7*blk -.4*pf-tov)%>%
 
 
 model <- lm(PPP ~ tov_per + blk_per + sfl_per + fg_pct, data = regression_df)
@@ -163,15 +161,6 @@ vif(model)
 
 
 matchup_impact <- regression_df%>%
-  # mutate(matchup_impact_score = 0.0000000000000002253 + PPP + (0.0544 * fga_per) + 
-  #          (0.84985 * fgm_per) - (0.008697 * tov_per) + 	
-  #          (-0.042 * blk_per) - (0.22572 * sfl_per))%>%
-  # mutate(matchup_impact_score = PPP - (0.7 * fga_per) + 
-  #          (0.4 * fgm_per) - (tov_per) - 	
-  #          (0.7 * blk_per) + (0.6 * sfl_per))%>%
-  # mutate(matchup_impact_score = (PLAYER_PTS - (0.7 *  MATCHUP_FGA) + 
-  #          (0.4 *  MATCHUP_FGM) - (MATCHUP_TOV) - 	
-  #          (0.7 * MATCHUP_BLK) + (0.6 * SFL))/PARTIAL_POSS)%>%
   mutate(matchup_impact_score = 0.001275 + PPP+ (0.402500 * fg_pct) + (0.134609 * tov_per) +
            (0.103109 * blk_per) + (0.409438 * sfl_per))%>%
   reframe(Year, OFF_PLAYER_ID,OFF_PLAYER_NAME,DEF_PLAYER_ID, DEF_PLAYER_NAME, MATCHUP_MIN, PARTIAL_POSS,
@@ -233,38 +222,6 @@ player_shot_detail21 <- player_shot_detail21%>%
 
 
 player_shot_detail_full <- rbind(player_shot_detail24,player_shot_detail23,player_shot_detail22,player_shot_detail21)
-
-
-# 
-# player_shot_chart_freq_data <- player_shot_detail_full%>%
-#   mutate(final_zone = case_when(
-#     SHOT_ZONE_BASIC == "Above the Break 3" & SHOT_ZONE_AREA == "Left Side Center(LC)" ~ "Left Side Above the Break 3",
-#     SHOT_ZONE_BASIC == "Above the Break 3" & SHOT_ZONE_AREA == "Right Side Center(RC)" ~ "Right Side Above the Break 3",
-#     SHOT_ZONE_BASIC == "Above the Break 3" & SHOT_ZONE_AREA == "Center(C)" ~ "Center Above the Break 3",
-#     SHOT_ZONE_BASIC == "Right Corner 3" ~ "Right Corner 3",
-#     SHOT_ZONE_BASIC == "Left Corner 3" ~ "Left Corner 3",
-#     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Left Side(L)" ~ "Left Side Mid-Range",
-#     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Left Side Center(LC)" ~ "Left Side Center Mid-Range",
-#     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Center(C)" ~ "Center Mid-Range",
-#     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Right Side Center(RC)" ~ "Right Side Center Mid-Range",
-#     SHOT_ZONE_BASIC == "Mid-Range" & SHOT_ZONE_AREA == "Right Side(R)" ~ "Right Side Mid-Range",
-#     SHOT_ZONE_BASIC == "Restricted Area" |  (SHOT_ZONE_BASIC == "In The Paint (Non-RA)" & SHOT_ZONE_RANGE == "Less Than 8 ft.") ~ "Rim",
-#     SHOT_ZONE_BASIC == "In The Paint (Non-RA)" & SHOT_ZONE_RANGE != "Less Than 8 ft." ~ "Paint",
-#     TRUE ~ player_shot_detail_full$SHOT_ZONE_BASIC),
-#     points = case_when(
-#       SHOT_TYPE == "2PT Field Goal" & SHOT_MADE_FLAG == "1" ~ 2,
-#       SHOT_TYPE == "3PT Field Goal" & SHOT_MADE_FLAG == "1" ~ 3,
-#       TRUE ~ 0))%>%
-#   group_by(PLAYER_ID,Year)%>%
-#   mutate(total_overall_shots = n())%>%
-#   ungroup()%>%
-#   group_by(PLAYER_ID,Year,final_zone)%>%
-#   mutate(frequency = n()/total_overall_shots,
-#          pps = round(sum(points)/n(),2))%>%
-#   reframe(Year,PLAYER_ID,PLAYER_NAME,final_zone, frequency, pps)%>%
-#   distinct(PLAYER_ID,Year,final_zone,.keep_all = TRUE)
-# 
-# 
 
 
 
@@ -373,19 +330,16 @@ model_data_join <- total_wingspan%>%
   select(-sfl_per,-blk_per,-tov_per,-fgm_per,-fga_per,-PPP,-SFL,-MATCHUP_FGA,-MATCHUP_FGM,
          -PLAYER_PTS,-PARTIAL_POSS,-MATCHUP_MIN)
 
-str(model_data)
 
 
 
 # Making train and test datasets
 smp_size <- floor(0.75 * nrow(model_data))
-set.seed(2011) #go lions
+set.seed(2024) 
 ind <- sample(seq_len(nrow(model_data)), size = smp_size)
 train <- as.matrix(model_data[ind, ])
 test <- as.matrix(model_data[-ind, ])
 
-dim(train)
-colnames(train)
 
 # Making the model
 defending_model <-
@@ -400,7 +354,15 @@ defending_model <-
   )   
 
 
-vip(defending_model)
+## Variable Importance Plot
+vip(defending_model, num_features = 15)+
+  theme_minimal()+
+  geom_col( size = 1, color = "black", fill = "lightblue") +
+  labs(title = "Defensive Matchup Model Score Variable Importance")+
+  theme(
+    plot.title = element_text(size = 25, hjust = 0.5, face = "bold"),
+    axis.title.x = element_text(size=18),
+    axis.text = element_text(size = 13)) 
 
 grid <- expand.grid(
   nrounds = c(1000, 2000, 3000),
@@ -564,73 +526,14 @@ analyze_player <- function(player_row) {
     cat("Optimization failed. Please check the input data and try again.\n")
     return(NULL)
   }
-  # 
-  # # Calculate improvement
-  # improvement <- current_impact - optimization_results$expected_impact
-  # 
-  # # Print results
-  # cat(sprintf("\nPlayer: %s\n", player_row$OFF_PLAYER_NAME[1]))
-  # cat(sprintf("\nCurrent Measurements:\n"))
-  # cat(sprintf("Height: %.1f inches (%.1f'%.1f\")\n", 
-  #             current_height, 
-  #             floor(current_height/12), 
-  #             current_height %% 12))
-  # cat(sprintf("Wingspan: %.1f inches (%.1f'%.1f\")\n", 
-  #             current_wingspan,
-  #             floor(current_wingspan/12), 
-  #             current_wingspan %% 12))
-  # cat(sprintf("Current Impact Score: %.3f\n\n", current_impact))
-  # 
-  # cat(sprintf("Optimal Measurements:\n"))
-  # cat(sprintf("Height: %.1f inches (%.1f'%.1f\")\n", 
-  #             optimization_results$optimal_height,
-  #             floor(optimization_results$optimal_height/12),
-  #             optimization_results$optimal_height %% 12))
-  # cat(sprintf("Wingspan: %.1f inches (%.1f'%.1f\")\n",
-  #             optimization_results$optimal_wingspan,
-  #             floor(optimization_results$optimal_wingspan/12),
-  #             optimization_results$optimal_wingspan %% 12))
-  # cat(sprintf("Optimized Impact Score: %.3f\n", optimization_results$expected_impact))
-  # cat(sprintf("Potential Improvement: %.3f\n", improvement))
-  # return(optimization_results)
-  
   
   # Create comparison dataframe
   comparison_df <- data.frame(
     offensive_player = player_row$OFF_PLAYER_NAME[1],
-    defensive_player = player_row$DEF_PLAYER_NAME[1],
-    off_height = current_height,
-    off_height_ft = paste(floor(current_height/12), round(current_height %% 12, 1), sep="'"),
-    off_wingspan = current_wingspan,
-    off_wingspan_ft = paste(floor(current_wingspan/12), round(current_wingspan %% 12, 1), sep="'"),
-    current_def_height = current_def_height,
-    current_def_height_ft = paste(floor(current_def_height/12), round(current_def_height %% 12, 1), sep="'"),
-    current_def_wingspan = current_def_wingspan,
-    current_def_wingspan_ft = paste(floor(current_def_wingspan/12), round(current_def_wingspan %% 12, 1), sep="'"),
-    optimal_def_height = optimization_results$optimal_height,
-    optimal_def_height_ft = paste(floor(optimization_results$optimal_height/12), 
-                                  round(optimization_results$optimal_height %% 12, 1), sep="'"),
-    optimal_def_wingspan = optimization_results$optimal_wingspan,
-    optimal_def_wingspan_ft = paste(floor(optimization_results$optimal_wingspan/12), 
-                                    round(optimization_results$optimal_wingspan %% 12, 1), sep="'"),
-    current_impact_score = current_impact,
-    optimal_impact_score = optimization_results$expected_impact,
-    improvement = current_impact - optimization_results$expected_impact
+    defensive_player = player_row$DEF_PLAYER_NAME[1]
   )
   return(comparison_df)
 }
-# 
-# player_row <- defending_projs%>%
-#   filter(OFF_PLAYER_NAME == "Jayson Tatum")
-#   
-# results <- analyze_player(player_row)
-
-
-
-
-
-
-
 
 
 
@@ -719,9 +622,13 @@ player_row <- defending_projs %>%
 # 2. Run the analysis with the all_defenders dataframe
 results_df <- analyze_player(player_row, all_defenders)
 
-# 3. View the results
-print(results_df)
 
+
+
+
+
+
+### Charts
 
 
 logos <- hoopR::load_nba_player_box(2025)%>%
